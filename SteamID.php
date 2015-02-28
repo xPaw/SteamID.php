@@ -147,7 +147,7 @@ class SteamID
 	}
 	
 	/**
-	 * Renders this instance into it's Steam2 "STEAM_" represenation.
+	 * Renders this instance into it's Steam2 "STEAM_" representation.
 	 * 
 	 * @return string A string Steam2 "STEAM_" representation of this SteamID.
 	 */
@@ -178,7 +178,7 @@ class SteamID
 	}
 	
 	/**
-	 * Renders this instance into it's Steam3 represenation.
+	 * Renders this instance into it's Steam3 representation.
 	 * 
 	 * @return string A string Steam3 representation of this SteamID.
 	 */
