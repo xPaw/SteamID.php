@@ -174,7 +174,7 @@ class SteamID
 			}
 			default:
 			{
-				return 'STEAM_INVALID';
+				return $this->ConvertToUInt64();
 			}
 		}
 	}
