@@ -100,10 +100,17 @@ class SteamID
 		}
 		
 		// SetFromString
-		if( preg_match( '/^STEAM_([0-5]):([0-1]):([0-9]+)$/', $Value, $Matches ) === 1 )
+		if( preg_match( '/^STEAM_([0-5]):([0-1]):([0-9]{1,10})$/', $Value, $Matches ) === 1 )
 		{
+			$AccountID = $Matches[ 3 ];
+			
+			if( gmp_cmp( $AccountID, PHP_INT_MAX ) > 0 )
+			{
+				throw new InvalidArgumentException( 'Provided SteamID is invalid' );
+			}
+			
 			$AuthServer = (int)$Matches[ 2 ];
-			$AccountID = ( (int)$Matches[ 3 ] << 1 ) | $AuthServer;
+			$AccountID = ( (int)$AccountID << 1 ) | $AuthServer;
 			
 			$this->SetAccountUniverse( self :: UniversePublic );
 			$this->SetAccountInstance( self :: DesktopInstance );
@@ -111,8 +118,15 @@ class SteamID
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-5]):([0-9]+)(:[0-9]+)?\\]$/', $Value, $Matches ) === 1 )
+		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-5]):([0-9]+)(:[0-9]{1,10})?\\]$/', $Value, $Matches ) === 1 )
 		{
+			$AccountID = $Matches[ 3 ];
+			
+			if( gmp_cmp( $AccountID, PHP_INT_MAX ) > 0 )
+			{
+				throw new InvalidArgumentException( 'Provided SteamID is invalid' );
+			}
+			
 			$Type = $Matches[ 1 ];
 			
 			$InstanceID = isset( $Matches[ 4 ] ) ? (int)ltrim( $Matches[ 4 ], ':' ) : ( $Type === 'g' ? 0 : 1 );
@@ -136,7 +150,7 @@ class SteamID
 			
 			$this->SetAccountUniverse( (int)$Matches[ 2 ] );
 			$this->SetAccountInstance( $InstanceID );
-			$this->SetAccountID( (int)$Matches[ 3 ] );
+			$this->SetAccountID( (int)$AccountID );
 		}
 		else if( is_numeric( $Value ) )
 		{
