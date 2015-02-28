@@ -130,7 +130,6 @@
 		public function testConstructorHandlesInvalid( )
 		{
 			$Ids = Array(
-				null,
 				'',
 				'NOT A STEAMID!',
 				'STEAM_0:1:999999999999999999999999999999',
@@ -151,7 +150,7 @@
 					continue;
 				}
 				
-				$this->fail( 'An expected exception has not been raised.' );
+				$this->fail( 'An expected exception has not been raised for steamid "' . $SteamID . '".' );
 			}
 		}
 		
