@@ -277,6 +277,21 @@ class SteamID
 	}
 	
 	/**
+	 * Sets the various components of this SteamID from a 64bit integer form.
+	 * 
+	 * @param Value The 64bit integer to assign this SteamID from.
+	 */
+	public function SetFromUInt64( $Value )
+	{
+		if( is_numeric( $Value ) )
+		{
+			$this->Data = gmp_init( $Value );
+		}
+		
+		// TODO: should it throw on non-numeric value, or return a boolean?
+	}
+	
+	/**
 	 * Converts this SteamID into it's 64bit integer form. This function returns as a string to work on 32-bit PHP systems.
 	 * 
 	 * @return string A 64bit integer representing this SteamID.
