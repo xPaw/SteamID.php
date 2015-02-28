@@ -122,7 +122,6 @@
 			{
 				$s = new SteamID( $SteamID );
 				
-				$this->assertTrue( $s->IsValid() );
 				$this->assertEquals( $SteamID, $s->RenderSteam3() );
 			}
 		}
