@@ -94,7 +94,7 @@ class SteamID
 	{
 		$this->Data = gmp_init( 0 );
 		
-		if( !$Value )
+		if( $Value === null )
 		{
 			return;
 		}
@@ -141,6 +141,10 @@ class SteamID
 		else if( is_numeric( $Value ) )
 		{
 			$this->Data = gmp_init( $Value );
+		}
+		else
+		{
+			throw new InvalidArgumentException( 'Provided SteamID is invalid' );
 		}
 	}
 	
@@ -286,9 +290,11 @@ class SteamID
 		if( is_numeric( $Value ) )
 		{
 			$this->Data = gmp_init( $Value );
+			
+			return;
 		}
 		
-		// TODO: should it throw on non-numeric value, or return a boolean?
+		throw new InvalidArgumentException( 'Provided SteamID is numeric' );
 	}
 	
 	/**
