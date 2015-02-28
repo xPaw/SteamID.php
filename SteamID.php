@@ -92,6 +92,8 @@ class SteamID
 	 */
 	public function __construct( $Value = null )
 	{
+		$this->Data = gmp_init( 0 );
+		
 		if( !$Value )
 		{
 			return;
@@ -100,8 +102,6 @@ class SteamID
 		// SetFromString
 		if( preg_match( '/^STEAM_([0-5]):([0-1]):([0-9]+)$/', $Value, $Matches ) === 1 )
 		{
-			$this->Data = gmp_init( 0 );
-			
 			$AuthServer = (int)$Matches[ 2 ];
 			$AccountID = ( (int)$Matches[ 3 ] << 1 ) | $AuthServer;
 			
@@ -113,8 +113,6 @@ class SteamID
 		// SetFromSteam3String
 		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-5]):([0-9]+)(:[0-9]+)?\\]$/', $Value, $Matches ) === 1 )
 		{
-			$this->Data = gmp_init( 0 );
-			
 			$Type = $Matches[ 1 ];
 			
 			$InstanceID = isset( $Matches[ 4 ] ) ? (int)ltrim( $Matches[ 4 ], ':' ) : ( $Type === 'g' ? 0 : 1 );
@@ -232,11 +230,6 @@ class SteamID
 	 */
 	public function IsValid( )
 	{
-		if( !$this->Data )
-		{
-			return false;
-		}
-		
 		$AccountType = $this->GetAccountType();
 		
 		if( $AccountType <= self :: TypeInvalid || $AccountType >= 11 ) // EAccountType.Max
