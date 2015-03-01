@@ -62,3 +62,7 @@ catch( InvalidArgumentException $e )
 ```
 
 After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or `ConvertToUInt64` to get normalized SteamID.
+
+## License
+
+LGPL v2.1. See [LICENSE](LICENSE) file for more information.
