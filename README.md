@@ -47,7 +47,7 @@ try
 	{
 		throw new InvalidArgumentException( 'We only support individual SteamIDs.' );
 	}
-	else if( !$SteamID->IsValid() )
+	else if( !s->IsValid() )
 	{
 		throw new InvalidArgumentException( 'Invalid SteamID.' );
 	}
