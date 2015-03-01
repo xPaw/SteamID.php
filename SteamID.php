@@ -129,7 +129,18 @@ class SteamID
 			
 			$Type = $Matches[ 1 ];
 			
-			$InstanceID = isset( $Matches[ 4 ] ) ? (int)ltrim( $Matches[ 4 ], ':' ) : ( $Type === 'g' ? 0 : 1 );
+			if( isset( $Matches[ 4 ] ) )
+			{
+				$InstanceID = (int)ltrim( $Matches[ 4 ], ':' );
+			}
+			else if( $Type === 'U' )
+			{
+				$InstanceID = self :: DesktopInstance;
+			}
+			else
+			{
+				$InstanceID = self :: AllInstances;
+			}
 			
 			if( $Type === 'c' )
 			{
