@@ -23,15 +23,15 @@ It's really use to use it, as constructor automatically figures out given input 
 try
 {
 	$s = new SteamID( '76561197984981409' ); // Also accepts Steam3 and Steam2 representations
-	
-	echo $s->RenderSteam3() . PHP_EOL; // Renders SteamID in it's Steam3 representation *(e.g. [U:1:24715681])*
-	echo $s->RenderSteam2() . PHP_EOL; // Renders SteamID in it's Steam2 representation *(e.g. STEAM_0:1:12357840)*
-	echo $s->ConvertToUInt64() . PHP_EOL; // Converts this SteamID into it's 64bit integer form *(e.g. 76561197984981409)*
 }
 catch( InvalidArgumentException $e )
 {
 	echo 'Given SteamID could not be parsed.';
 }
+
+echo $s->RenderSteam3() . PHP_EOL; // Renders SteamID in it's Steam3 representation (e.g. [U:1:24715681])
+echo $s->RenderSteam2() . PHP_EOL; // Renders SteamID in it's Steam2 representation (e.g. STEAM_0:1:12357840)
+echo $s->ConvertToUInt64() . PHP_EOL; // Converts this SteamID into it's 64bit integer form (e.g. 76561197984981409)
 ```
 
 ### SteamID normalization
