@@ -4,6 +4,8 @@ This 64bit structure is used for identifying various objects on the Steam networ
 
 This library does not use subtraction hacks like described on [Valve Developer Wiki](https://developer.valvesoftware.com/wiki/SteamID), or used in many other functions.
 
+SteamID.php requires [GMP module](http://php.net/manual/en/book.gmp.php) to be installed to perform operations on unsigned 64-bit integers.
+
 ## Brief overview
 
 A SteamID is made up of four parts: its **universe**, its **type**, its **instance**, and its **account ID**.
