@@ -65,6 +65,85 @@ catch( InvalidArgumentException $e )
 
 After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or `ConvertToUInt64` to get normalized SteamID.
 
+## Functions
+
+<table>
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Parameters</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>IsValid</td>
+			<td>-</td>
+			<td>Gets a value indicating whether this instance is valid.</td>
+		</tr>
+		<tr>
+			<td>RenderSteam2</td>
+			<td>-</td>
+			<td>Renders this instance into it's Steam2 "STEAM_" representation.</td>
+		</tr>
+		<tr>
+			<td>RenderSteam3</td>
+			<td>-</td>
+			<td>Renders this instance into it's Steam3 representation.</td>
+		</tr>
+		<tr>
+			<td>ConvertToUInt64</td>
+			<td>-</td>
+			<td>Converts this SteamID into it's 64bit integer form.</td>
+		</tr>
+		<tr>
+			<td>SetFromUInt64</td>
+			<td>string or int (e.g 765...)</td>
+			<td>Sets the various components of this SteamID from a 64bit integer form.</td>
+		</tr>
+		<tr>
+			<td>GetAccountID</td>
+			<td>-</td>
+			<td>Gets the account id.</td>
+		</tr>
+		<tr>
+			<td>GetAccountInstance</td>
+			<td>-</td>
+			<td>Gets the account instance.</td>
+		</tr>
+		<tr>
+			<td>GetAccountType</td>
+			<td>-</td>
+			<td>Gets the account type.</td>
+		</tr>
+		<tr>
+			<td>GetAccountUniverse</td>
+			<td>-</td>
+			<td>Gets the account universe.</td>
+		</tr>
+		<tr>
+			<td>SetAccountID</td>
+			<td>New account id</td>
+			<td>Sets the account id.</td>
+		</tr>
+		<tr>
+			<td>SetAccountInstance</td>
+			<td>New account instance</td>
+			<td>Sets the account instance. (e.g. <code>SteamID::DesktopInstance</code>)</td>
+		</tr>
+		<tr>
+			<td>SetAccountType</td>
+			<td>New account type</td>
+			<td>Sets the account type. (e.g. <code>SteamID::TypeAnonGameServer</code>)</td>
+		</tr>
+		<tr>
+			<td>SetAccountUniverse</td>
+			<td>New account universe</td>
+			<td>Sets the account universe. (e.g. <code>SteamID::UniversePublic</code>)</td>
+		</tr>
+	</tbody>
+</table>
+
 ## License
 
 LGPL v2.1. See [LICENSE](LICENSE) file for more information.
