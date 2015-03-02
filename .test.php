@@ -97,14 +97,14 @@
 			$s = new SteamID( '[L:1:123]' );
 			
 			$this->assertEquals( 123, $s->GetAccountID() );
-			$this->assertTrue( ( $s->GetAccountInstance() & SteamID :: InstanceFlagLobby ) );
+			$this->assertTrue( !!( $s->GetAccountInstance() & SteamID :: InstanceFlagLobby ) );
 			$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 			$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
 			
 			$s = new SteamID( '[c:1:123]' );
 			
 			$this->assertEquals( 123, $s->GetAccountID() );
-			$this->assertTrue( ( $s->GetAccountInstance() & SteamID :: InstanceFlagClan ) );
+			$this->assertTrue( !!( $s->GetAccountInstance() & SteamID :: InstanceFlagClan ) );
 			$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 			$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
 		}
