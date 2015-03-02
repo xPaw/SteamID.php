@@ -14,61 +14,49 @@ class SteamID
 {
 	private static $AccountTypeChars = Array(
 		self :: TypeAnonGameServer => 'A',
-		self :: TypeGameServer => 'G',
-		self :: TypeMultiseat => 'M',
-		self :: TypePending => 'P',
-		self :: TypeContentServer => 'C',
-		self :: TypeClan => 'g',
-		self :: TypeChat => 'T', // Lobby chat is 'L', Clan chat is 'c'
-		self :: TypeInvalid => 'I',
-		self :: TypeIndividual => 'U',
-		self :: TypeAnonUser => 'a',
+		self :: TypeGameServer     => 'G',
+		self :: TypeMultiseat      => 'M',
+		self :: TypePending        => 'P',
+		self :: TypeContentServer  => 'C',
+		self :: TypeClan           => 'g',
+		self :: TypeChat           => 'T', // Lobby chat is 'L', Clan chat is 'c'
+		self :: TypeInvalid        => 'I',
+		self :: TypeIndividual     => 'U',
+		self :: TypeAnonUser       => 'a',
 	);
 	
 	/**
 	 * Steam universes. Each universe is a self-contained Steam instance.
 	 */
-	const UniverseInvalid = 0;
-	const UniversePublic = 1;
-	const UniverseBeta = 2;
+	const UniverseInvalid  = 0;
+	const UniversePublic   = 1;
+	const UniverseBeta     = 2;
 	const UniverseInternal = 3;
-	const UniverseDev = 4;
-	const UniverseRC = 5;
+	const UniverseDev      = 4;
+	const UniverseRC       = 5;
 	
 	/**
 	 * Steam account types.
 	 */
-	const TypeInvalid = 0;
-	const TypeIndividual = 1;
-	const TypeMultiseat = 2;
-	const TypeGameServer = 3;
+	const TypeInvalid        = 0;
+	const TypeIndividual     = 1;
+	const TypeMultiseat      = 2;
+	const TypeGameServer     = 3;
 	const TypeAnonGameServer = 4;
-	const TypePending = 5;
-	const TypeContentServer = 6;
-	const TypeClan = 7;
-	const TypeChat = 8;
+	const TypePending        = 5;
+	const TypeContentServer  = 6;
+	const TypeClan           = 7;
+	const TypeChat           = 8;
 	const TypeP2PSuperSeeder = 9;
-	const TypeAnonUser = 10;
+	const TypeAnonUser       = 10;
 	
 	/**
-	 * The account instance value when representing all instanced SteamIDs.
+	 * Steam allows 3 simultaneous user account instances right now.
 	 */
-	const AllInstances = 0;
-	
-	/**
-	 * The account instance value for a desktop SteamID.
-	 */
+	const AllInstances    = 0;
 	const DesktopInstance = 1;
-	
-	/**
-	 * The account instance value for a console SteamID.
-	 */
 	const ConsoleInstance = 2;
-	
-	/**
-	 * The account instance for mobile or web based SteamIDs.
-	 */
-	const WebInstance = 4;
+	const WebInstance     = 4;
 	
 	private $Data;
 	
