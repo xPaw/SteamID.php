@@ -58,6 +58,14 @@ class SteamID
 	const ConsoleInstance = 2;
 	const WebInstance     = 4;
 	
+	/**
+	 * Special flags for Chat accounts - they go in the top 8 bits
+	 * of the steam ID's "instance", leaving 12 for the actual instances
+	 */
+	const InstanceFlagClan     = 524288; // ( k_unSteamAccountInstanceMask + 1 ) >> 1
+	const InstanceFlagLobby    = 262144; // ( k_unSteamAccountInstanceMask + 1 ) >> 2
+	const InstanceFlagMMSLobby = 131072; // ( k_unSteamAccountInstanceMask + 1 ) >> 3
+	
 	private $Data;
 	
 	private function Get( $bitoffset, $valuemask )
@@ -132,13 +140,13 @@ class SteamID
 			
 			if( $Type === 'c' )
 			{
-				$InstanceID |= 524288; // ( AccountInstanceMask + 1 ) >> 1
+				$InstanceID |= self :: InstanceFlagClan;
 				
 				$this->SetAccountType( self :: TypeChat );
 			}
 			else if( $Type === 'L' )
 			{
-				$InstanceID |= 262144; // ( AccountInstanceMask + 1 ) >> 2
+				$InstanceID |= self :: InstanceFlagLobby;
 				
 				$this->SetAccountType( self :: TypeChat );
 			}
@@ -203,18 +211,23 @@ class SteamID
 		$AccountType = $this->GetAccountType();
 		$AccountTypeChar = isset( self :: $AccountTypeChars[ $AccountType ] ) ? self :: $AccountTypeChars[ $AccountType ] : 'i';
 		
-		/*if ( AccountType == EAccountType.Chat )
-		{
-		    if ( ( ( ChatInstanceFlags )AccountInstance ).HasFlag( ChatInstanceFlags.Clan ) )
-		       accountTypeChar = 'c';
-		    else if ( ( ( ChatInstanceFlags )AccountInstance ).HasFlag( ChatInstanceFlags.Lobby ) )
-		        accountTypeChar = 'L';
-		}*/
-		
 		$RenderInstance = false;
 		
 		switch( $AccountType )
 		{
+			case self :: TypeChat:
+			{
+				if( $AccountInstance & SteamID :: InstanceFlagClan )
+				{
+					$AccountTypeChar = 'c';
+				}
+				else if( $AccountInstance & SteamID :: InstanceFlagLobby )
+				{
+					$AccountTypeChar = 'L';
+				}
+				
+				break;
+			}
 			case self :: TypeAnonGameServer:
 			case self :: TypeMultiseat:
 			{

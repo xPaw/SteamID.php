@@ -97,14 +97,14 @@
 			$s = new SteamID( '[L:1:123]' );
 			
 			$this->assertEquals( 123, $s->GetAccountID() );
-			//Assert.True( ( ( SteamID.ChatInstanceFlags )sidLobby.AccountInstance ).HasFlag( SteamID.ChatInstanceFlags.Lobby ) );
+			$this->assertTrue( ( $s->GetAccountInstance() & SteamID :: InstanceFlagLobby ) );
 			$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 			$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
 			
 			$s = new SteamID( '[c:1:123]' );
 			
 			$this->assertEquals( 123, $s->GetAccountID() );
-			//Assert.True( ( ( SteamID.ChatInstanceFlags )sidClanChat.AccountInstance ).HasFlag( SteamID.ChatInstanceFlags.Clan ) );
+			$this->assertTrue( ( $s->GetAccountInstance() & SteamID :: InstanceFlagClan ) );
 			$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 			$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
 		}
@@ -116,6 +116,9 @@
 				'[U:1:123:2]',
 				'[G:1:626]',
 				'[A:2:165:1234]',
+				'[T:1:123]',
+				'[c:1:123]',
+				'[L:1:123]',
 			);
 			
 			foreach( $Ids as $SteamID )
