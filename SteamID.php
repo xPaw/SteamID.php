@@ -320,6 +320,8 @@ class SteamID
 	 *
 	 * @param int $Value The 64bit integer to assign this SteamID from.
 	 * 
+	 * @return SteamID Fluent interface
+	 * 
 	 * @throws InvalidArgumentException
 	 */
 	public function SetFromUInt64( $Value )
@@ -327,11 +329,13 @@ class SteamID
 		if( is_numeric( $Value ) )
 		{
 			$this->Data = gmp_init( $Value );
-			
-			return;
+		}
+		else
+		{
+			throw new InvalidArgumentException( 'Provided SteamID is numeric' );
 		}
 		
-		throw new InvalidArgumentException( 'Provided SteamID is numeric' );
+		return $this;
 	}
 	
 	/**
