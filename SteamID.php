@@ -1,28 +1,39 @@
 <?php
 /**
- * This 64bit structure is used for identifying various objects on the Steam network.
- * 
+ * The SteamID library provides an easy way to work with SteamIDs and makes
+ * conversions easy. Ported from SteamKit.
+ *
+ * This 64bit structure is used for identifying various objects on the Steam
+ * network.
+ *
  * This library requires GMP module to be installed.
- * 
- * This implementation was ported by xPaw from SteamKit:
- * https://github.com/SteamRE/SteamKit/blob/master/SteamKit2/SteamKit2/Types/SteamID.cs
- * 
- * GitHub: https://github.com/xPaw/SteamID.php
- * Website: http://xpaw.me
+ *
+ * This implementation was ported from SteamKit:
+ * {@link https://github.com/SteamRE/SteamKit/blob/master/SteamKit2/SteamKit2/Types/SteamID.cs}
+ *
+ * GitHub: {@link https://github.com/xPaw/SteamID.php}
+ * Website: {@link http://xpaw.me}
+ *
+ * @author xPaw
+ * @license LGPL
+ * @version 0.0.1
  */
 class SteamID
 {
+	/**
+	 * @var array Types of steam account
+	 */
 	private static $AccountTypeChars = Array(
-		self :: TypeAnonGameServer => 'A',
-		self :: TypeGameServer     => 'G',
-		self :: TypeMultiseat      => 'M',
-		self :: TypePending        => 'P',
-		self :: TypeContentServer  => 'C',
-		self :: TypeClan           => 'g',
-		self :: TypeChat           => 'T', // Lobby chat is 'L', Clan chat is 'c'
-		self :: TypeInvalid        => 'I',
-		self :: TypeIndividual     => 'U',
-		self :: TypeAnonUser       => 'a',
+		self::TypeAnonGameServer => 'A',
+		self::TypeGameServer     => 'G',
+		self::TypeMultiseat      => 'M',
+		self::TypePending        => 'P',
+		self::TypeContentServer  => 'C',
+		self::TypeClan           => 'g',
+		self::TypeChat           => 'T', // Lobby chat is 'L', Clan chat is 'c'
+		self::TypeInvalid        => 'I',
+		self::TypeIndividual     => 'U',
+		self::TypeAnonUser       => 'a',
 	);
 	
 	/**
@@ -66,25 +77,19 @@ class SteamID
 	const InstanceFlagLobby    = 262144; // ( k_unSteamAccountInstanceMask + 1 ) >> 2
 	const InstanceFlagMMSLobby = 131072; // ( k_unSteamAccountInstanceMask + 1 ) >> 3
 	
+	/**
+	 * @var resource
+	 */
 	private $Data;
-	
-	private function Get( $bitoffset, $valuemask )
-	{
-		return gmp_and( self :: ShiftRight( $this->Data, $bitoffset ), $valuemask );
-	}
-	
-	private function Set( $bitoffset, $valuemask, $value )
-	{
-		$this->Data = gmp_or(
-			gmp_and( $this->Data, gmp_com( self :: ShiftLeft( $valuemask, $bitoffset ) ) ),
-			self :: ShiftLeft( gmp_and( $value, $valuemask ), $bitoffset )
-		);
-	}
 	
 	/**
 	 * Initializes a new instance of the SteamID class.
+	 *
+	 * It automatically guesses which type the input is, and works from there.
+	 *
+	 * @param string|null $Value
 	 * 
-	 * It automatically guessess which type the input is, and works from there.
+	 * @return SteamID Instance of SteamID class
 	 */
 	public function __construct( $Value = null )
 	{
@@ -108,9 +113,9 @@ class SteamID
 			$AuthServer = (int)$Matches[ 2 ];
 			$AccountID = ( (int)$AccountID << 1 ) | $AuthServer;
 			
-			$this->SetAccountUniverse( self :: UniversePublic );
-			$this->SetAccountInstance( self :: DesktopInstance );
-			$this->SetAccountType( self :: TypeIndividual );
+			$this->SetAccountUniverse( self::UniversePublic );
+			$this->SetAccountInstance( self::DesktopInstance );
+			$this->SetAccountType( self::TypeIndividual );
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
@@ -131,35 +136,35 @@ class SteamID
 			}
 			else if( $Type === 'U' )
 			{
-				$InstanceID = self :: DesktopInstance;
+				$InstanceID = self::DesktopInstance;
 			}
 			else
 			{
-				$InstanceID = self :: AllInstances;
+				$InstanceID = self::AllInstances;
 			}
 			
 			if( $Type === 'c' )
 			{
-				$InstanceID |= self :: InstanceFlagClan;
+				$InstanceID |= self::InstanceFlagClan;
 				
-				$this->SetAccountType( self :: TypeChat );
+				$this->SetAccountType( self::TypeChat );
 			}
 			else if( $Type === 'L' )
 			{
-				$InstanceID |= self :: InstanceFlagLobby;
+				$InstanceID |= self::InstanceFlagLobby;
 				
-				$this->SetAccountType( self :: TypeChat );
+				$this->SetAccountType( self::TypeChat );
 			}
 			else
 			{
-				$this->SetAccountType( array_search( $Type, self :: $AccountTypeChars, true ) );
+				$this->SetAccountType( array_search( $Type, self::$AccountTypeChars, true ) );
 			}
 			
 			$this->SetAccountUniverse( (int)$Matches[ 2 ] );
 			$this->SetAccountInstance( $InstanceID );
 			$this->SetAccountID( (int)$AccountID );
 		}
-		else if( is_numeric( $Value ) )
+		else if( is_numeric( $Value ) && $Value >= 0 )
 		{
 			$this->Data = gmp_init( $Value );
 		}
@@ -171,27 +176,28 @@ class SteamID
 	
 	/**
 	 * Renders this instance into it's Steam2 "STEAM_" representation.
-	 * 
+	 *
 	 * @return string A string Steam2 "STEAM_" representation of this SteamID.
 	 */
 	public function RenderSteam2()
 	{
 		switch( $this->GetAccountType() )
 		{
-			case self :: TypeInvalid:
-			case self :: TypeIndividual:
+			case self::TypeInvalid:
+			case self::TypeIndividual:
 			{
 				$Universe = $this->GetAccountUniverse();
 				
-				if( $Universe === self :: UniversePublic )
+				if( $Universe === self::UniversePublic )
 				{
 					// They're both STEAM_0
-					$Universe = self :: UniverseInvalid;
+					$Universe = self::UniverseInvalid;
 				}
 				
 				$AccountID = $this->GetAccountID();
 				
-				return 'STEAM_' . $Universe . ':' . ( $AccountID & 1 ) . ':' . ( $AccountID >> 1 );
+				return 'STEAM_' . $Universe . ':' . ( $AccountID & 1 ) . ':' . 
+					( $AccountID >> 1 );
 			}
 			default:
 			{
@@ -201,21 +207,23 @@ class SteamID
 	}
 	
 	/**
-	 * Renders this instance into it's Steam3 representation.
-	 * 
+	 * Renders this instance into its Steam3 representation.
+	 *
 	 * @return string A string Steam3 representation of this SteamID.
 	 */
 	public function RenderSteam3()
 	{
 		$AccountInstance = $this->GetAccountInstance();
 		$AccountType = $this->GetAccountType();
-		$AccountTypeChar = isset( self :: $AccountTypeChars[ $AccountType ] ) ? self :: $AccountTypeChars[ $AccountType ] : 'i';
+		$AccountTypeChar = isset( self::$AccountTypeChars[ $AccountType ] ) ? 
+			self::$AccountTypeChars[ $AccountType ] : 
+			'i';
 		
 		$RenderInstance = false;
 		
 		switch( $AccountType )
 		{
-			case self :: TypeChat:
+			case self::TypeChat:
 			{
 				if( $AccountInstance & SteamID :: InstanceFlagClan )
 				{
@@ -228,22 +236,23 @@ class SteamID
 				
 				break;
 			}
-			case self :: TypeAnonGameServer:
-			case self :: TypeMultiseat:
+			case self::TypeAnonGameServer:
+			case self::TypeMultiseat:
 			{
 				$RenderInstance = true;
 				
 				break;
 			}
-			case self :: TypeIndividual:
+			case self::TypeIndividual:
 			{
-				$RenderInstance = $AccountInstance != self :: DesktopInstance;
+				$RenderInstance = $AccountInstance != self::DesktopInstance;
 				
 				break;
 			}
 		}
 		
-		$Return = '[' . $AccountTypeChar . ':' . $this->GetAccountUniverse() . ':' . $this->GetAccountID();
+		$Return = '[' . $AccountTypeChar . ':' . $this->GetAccountUniverse() . 
+			':' . $this->GetAccountID();
 		
 		if( $RenderInstance )
 		{
@@ -255,23 +264,23 @@ class SteamID
 	
 	/**
 	 * Gets a value indicating whether this instance is valid.
-	 * 
+	 *
 	 * @return bool true if this instance is valid; otherwise, false.
 	 */
-	public function IsValid( )
+	public function IsValid()
 	{
 		$AccountType = $this->GetAccountType();
 		
-		if( $AccountType <= self :: TypeInvalid || $AccountType >= 11 ) // EAccountType.Max
+		if( $AccountType <= self::TypeInvalid || $AccountType >= 11 ) // EAccountType.Max
 		{
 			return false;
 		}
 		
 		$AccountUniverse = $this->GetAccountUniverse();
 		
-		// We don't careabout non-public universes,
-		// but it should be ( this.AccountUniverse <= EUniverse.Invalid || this.AccountUniverse >= EUniverse.Max )
-		if( $AccountUniverse > self :: UniversePublic )
+		// We don't care about non-public universes, but it should be
+		// ( this.AccountUniverse <= EUniverse.Invalid || this.AccountUniverse >= EUniverse.Max )
+		if( $AccountUniverse > self::UniversePublic )
 		{
 			return false;
 		}
@@ -279,15 +288,15 @@ class SteamID
 		$AccountID = $this->GetAccountID();
 		$AccountInstance = $this->GetAccountInstance();
 		
-		if( $AccountType === self :: TypeIndividual )
+		if( $AccountType === self::TypeIndividual )
 		{
-			if( $AccountID == 0 || $AccountInstance > self :: WebInstance )
+			if( $AccountID == 0 || $AccountInstance > self::WebInstance )
 			{
 				return false;
 			}
 		}
 		
-		if( $AccountType === self :: TypeClan )
+		if( $AccountType === self::TypeClan )
 		{
 			if( $AccountID == 0 || $AccountInstance != 0 )
 			{
@@ -295,7 +304,7 @@ class SteamID
 			}
 		}
 		
-		if( $AccountType === self :: TypeGameServer )
+		if( $AccountType === self::TypeGameServer )
 		{
 			if( $AccountID == 0 )
 			{
@@ -308,8 +317,10 @@ class SteamID
 	
 	/**
 	 * Sets the various components of this SteamID from a 64bit integer form.
+	 *
+	 * @param int $Value The 64bit integer to assign this SteamID from.
 	 * 
-	 * @param Value The 64bit integer to assign this SteamID from.
+	 * @throws InvalidArgumentException
 	 */
 	public function SetFromUInt64( $Value )
 	{
@@ -324,8 +335,9 @@ class SteamID
 	}
 	
 	/**
-	 * Converts this SteamID into it's 64bit integer form. This function returns as a string to work on 32-bit PHP systems.
-	 * 
+	 * Converts this SteamID into it's 64bit integer form. This function returns 
+	 * as a string to work on 32-bit PHP systems.
+	 *
 	 * @return string A 64bit integer representing this SteamID.
 	 */
 	public function ConvertToUInt64()
@@ -335,7 +347,7 @@ class SteamID
 	
 	/**
 	 * Gets the account id.
-	 * 
+	 *
 	 * @return int The account id.
 	 */
 	public function GetAccountID()
@@ -345,7 +357,7 @@ class SteamID
 	
 	/**
 	 * Gets the account instance.
-	 * 
+	 *
 	 * @return int The account instance.
 	 */
 	public function GetAccountInstance()
@@ -355,7 +367,7 @@ class SteamID
 	
 	/**
 	 * Gets the account type.
-	 * 
+	 *
 	 * @return int The account type.
 	 */
 	public function GetAccountType()
@@ -365,7 +377,7 @@ class SteamID
 	
 	/**
 	 * Gets the account universe.
-	 * 
+	 *
 	 * @return int The account universe.
 	 */
 	public function GetAccountUniverse()
@@ -375,49 +387,107 @@ class SteamID
 	
 	/**
 	 * Sets the account id.
+	 *
+	 * @param int $Value The account id.
 	 * 
-	 * @param Value The account id.
+	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountID( $Value )
 	{
 		$this->Set( 0, '0xFFFFFFFF', $Value );
+		
+		return $this;
 	}
 	
 	/**
 	 * Sets the account instance.
+	 *
+	 * @param int $Value The account instance.
 	 * 
-	 * @param Value The account instance.
+	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountInstance( $Value )
 	{
 		$this->Set( 32, '0xFFFFF', $Value );
+		
+		return $this;
 	}
 	
 	/**
 	 * Sets the account type.
+	 *
+	 * @param int $Value The account type.
 	 * 
-	 * @param Value The account type.
+	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountType( $Value )
 	{
 		$this->Set( 52, '0xF', $Value );
+		
+		return $this;
 	}
 	
 	/**
 	 * Sets the account universe.
+	 *
+	 * @param int $Value The account universe.
 	 * 
-	 * @param Value The account universe.
+	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountUniverse( $Value )
 	{
 		$this->Set( 56, '0xFF', $Value );
+		
+		return $this;
 	}
 	
+	/**
+	 * @param int $BitOffset
+	 * @param int $ValueMask
+	 * 
+	 * @return resource
+	 */
+	private function Get( $BitOffset, $ValueMask )
+	{
+		return gmp_and( self::ShiftRight( $this->Data, $BitOffset ), $ValueMask );
+	}
+	
+	/**
+	 * @param int $BitOffset
+	 * @param int $ValueMask
+	 * @param int $Value
+	 * 
+	 * @return void
+	 */
+	private function Set( $BitOffset, $ValueMask, $Value )
+	{
+		$this->Data = gmp_or(
+			gmp_and( $this->Data, gmp_com( self::ShiftLeft( $ValueMask, $BitOffset ) ) ),
+			self::ShiftLeft( gmp_and( $Value, $ValueMask ), $BitOffset )
+		);
+	}
+	
+	/**
+	 * Shift the bits of $x by $n steps to the left
+	 * 
+	 * @param int|resource $x
+	 * @param int $n
+	 *
+	 * @return resource
+	 */
 	private static function ShiftLeft( $x, $n )
 	{
 		return gmp_mul( $x, gmp_pow( 2, $n ) );
 	}
-
+	
+	/**
+	 * Shift the bits of $x by $n steps to the right
+	 * 
+	 * @param int|resource $x
+	 * @param int$n
+	 *
+	 * @return resource
+	 */
 	private static function ShiftRight( $x, $n )
 	{
 		return gmp_div( $x, gmp_pow( 2, $n ) );
