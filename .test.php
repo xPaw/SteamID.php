@@ -132,6 +132,8 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			'STEAM_0:1:999999999999999999999999999999',
 			'[kek:1:0]',
 			'[Z:1:1]',
+			'[A:1:2:345)]',
+			'[A:1:2(345]',
 			'STEAM_0:6:4491990',
 			'STEAM_6:0:4491990',
 			-1

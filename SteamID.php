@@ -44,7 +44,6 @@ class SteamID
 	const UniverseBeta     = 2;
 	const UniverseInternal = 3;
 	const UniverseDev      = 4;
-	const UniverseRC       = 5;
 	
 	/**
 	 * Steam account types.
@@ -101,7 +100,7 @@ class SteamID
 		}
 		
 		// SetFromString
-		if( preg_match( '/^STEAM_([0-5]):([0-1]):([0-9]{1,10})$/', $Value, $Matches ) === 1 )
+		if( preg_match( '/^STEAM_([0-4]):([0-1]):([0-9]{1,10})$/', $Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
 			
@@ -119,7 +118,7 @@ class SteamID
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-5]):([0-9]{1,10})(:[0-9]+)?\\]$/', $Value, $Matches ) === 1 )
+		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', $Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
 			
@@ -130,9 +129,13 @@ class SteamID
 			
 			$Type = $Matches[ 1 ];
 			
-			if( isset( $Matches[ 4 ] ) )
+			if( $Type === 'T' || $Type === 'g' )
 			{
-				$InstanceID = (int)ltrim( $Matches[ 4 ], ':' );
+				$InstanceID = self::AllInstances;
+			}
+			else if( isset( $Matches[ 5 ] ) )
+			{
+				$InstanceID = (int)$Matches[ 5 ];
 			}
 			else if( $Type === 'U' )
 			{
@@ -145,13 +148,13 @@ class SteamID
 			
 			if( $Type === 'c' )
 			{
-				$InstanceID |= self::InstanceFlagClan;
+				$InstanceID = self::InstanceFlagClan;
 				
 				$this->SetAccountType( self::TypeChat );
 			}
 			else if( $Type === 'L' )
 			{
-				$InstanceID |= self::InstanceFlagLobby;
+				$InstanceID = self::InstanceFlagLobby;
 				
 				$this->SetAccountType( self::TypeChat );
 			}
