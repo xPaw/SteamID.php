@@ -45,6 +45,7 @@ class SteamID
 	const UniverseBeta     = 2;
 	const UniverseInternal = 3;
 	const UniverseDev      = 4;
+	const UniverseMax      = 5; // Max universes, not an actual universe
 	
 	/**
 	 * Steam account types.
@@ -289,9 +290,7 @@ class SteamID
 		
 		$AccountUniverse = $this->GetAccountUniverse();
 		
-		// We don't care about non-public universes, but it should be
-		// ( this.AccountUniverse <= EUniverse.Invalid || this.AccountUniverse >= EUniverse.Max )
-		if( $AccountUniverse > self::UniversePublic )
+		if( $AccountUniverse <= self::UniverseInvalid || $AccountUniverse >= self::UniverseMax )
 		{
 			return false;
 		}

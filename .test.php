@@ -32,14 +32,20 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID :: TypeContentServer, $s->GetAccountType() );
 		
 		$s = (new SteamID)
-			->SetAccountUniverse( SteamID :: UniversePublic )
+			->SetAccountUniverse( 1337 )
 			->SetAccountType( SteamID :: TypeClan )
 			->SetAccountID( 4321 );
 		
+		$this->assertFalse( $s->IsValid() );
 		$this->assertEquals( 4321, $s->GetAccountID() );
 		$this->assertEquals( 0, $s->GetAccountInstance() );
-		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
+		$this->assertEquals( 1337, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeClan, $s->GetAccountType() );
+		
+		$s->SetAccountUniverse( SteamID :: UniversePublic );
+		
+		$this->assertTrue( $s->IsValid() );
+		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 	}
 	
 	public function testLongConstructorAndSetterGetterValid( )
@@ -97,20 +103,20 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeAnonGameServer, $s->GetAccountType() );
 		
-		$s = new SteamID( '[L:1:123]' );
+		$s = new SteamID( '[L:2:123]' );
 		
 		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( 123, $s->GetAccountID() );
 		$this->assertTrue( !!( $s->GetAccountInstance() & SteamID :: InstanceFlagLobby ) );
-		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
+		$this->assertEquals( SteamID :: UniverseBeta, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
 		
-		$s = new SteamID( '[c:1:123]' );
+		$s = new SteamID( '[c:3:123]' );
 		
 		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( 123, $s->GetAccountID() );
 		$this->assertTrue( !!( $s->GetAccountInstance() & SteamID :: InstanceFlagClan ) );
-		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
+		$this->assertEquals( SteamID :: UniverseInternal, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
 		
 		$s = new SteamID( '[g:1:456]' );
@@ -122,13 +128,14 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeClan, $s->GetAccountType() );
 		
-		$s = new SteamID( '[G:1:1]' );
+		$s = new SteamID( '[G:4:1]' );
 		$this->assertTrue( $s->IsValid() );
 		
 		$s->SetAccountID( 0 );
 		
 		$this->assertFalse( $s->IsValid() );
 		$this->assertEquals( 0, $s->GetAccountID() );
+		$this->assertEquals( SteamID :: UniverseDev, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeGameServer, $s->GetAccountType() );
 	}
 	
