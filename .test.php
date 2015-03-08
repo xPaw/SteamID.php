@@ -137,9 +137,9 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	}
 	
 	/**
-	 * @dataProvider vanityURLProvider
+	 * @dataProvider vanityUrlProvider
 	 */
-	public function testSetFromURL( $URL )
+	public function testSetFromUrl( $URL )
 	{
 		$s = SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 		$this->assertTrue( $s->IsValid() );
@@ -179,7 +179,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		];
 	}
 	
-	public function vanityURLProvider( )
+	public function vanityUrlProvider( )
 	{
 		return
 		[
@@ -191,11 +191,11 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			[ 'http://steamcommunity.com/games/dota2' ],
 			[ 'http://steamcommunity.com/games/tf2/' ],
 			[ 'http://steamcommunity.com/profiles/[U:1:2:3]/' ],
-			[ 'https://steamcommunity.com/profiles/[U:4:2]/games' ],
+			[ 'https://steamcommunity.com/profiles/[U:1:2]/games' ],
 			[ 'http://steamcommunity.com/profiles/76561197960265733' ],
 			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
 			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
-			[ 'https://steamcommunity.com/profiles/364791574111977474' ],
+			[ 'https://steamcommunity.com/profiles/76561210845167618' ],
 		];
 	}
 	
