@@ -1,15 +1,17 @@
 {
-  "name": "xpaw/steamid.php",
-  "description": "SteamID conversion library",
-  "minimum-stability": "stable",
-  "license": "LGPL",
-  "authors": [
-    {
-      "name": "xPaw",
-      "email": "steamid.php@xpaw.me"
-    }
-  ],
-  "require-dev": {
-    "phpunit/phpunit": "4.7.x-dev"
-  }
+	"name": "xpaw/steamid",
+	"description": "SteamID conversion library",
+	"minimum-stability": "stable",
+	"license": "LGPL",
+	"authors":
+	[
+		{
+			"name": "xPaw",
+			"email": "steamid.php@xpaw.me"
+		}
+	],
+	"require-dev":
+	{
+		"phpunit/phpunit": "4.7.x-dev"
+	}
 }
