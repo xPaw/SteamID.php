@@ -339,6 +339,8 @@ class SteamID
 	 * 
 	 * It's up to you to throw any exceptions if you wish to do so.
 	 *
+	 * This function can act as a pass-through for rendered Steam2/Steam3 ids.
+	 *
 	 * Example implementation is provided in `VanityURLs.php` file.
 	 *
 	 * @param string $Value Input URL
@@ -357,6 +359,17 @@ class SteamID
 		else if( preg_match( '/^https?:\/\/steamcommunity.com\/(id|groups|games)\/([\w-]+)/', $Value, $Matches ) === 1
 		||       preg_match( '/^()([\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
 		{
+			// Steam doesn't allow vanity urls to be valid steamids
+			if( is_numeric( $Matches[ 2 ] ) )
+			{
+				$SteamID = new SteamID( $Matches[ 2 ] );
+				
+				if( $SteamID->IsValid() )
+				{
+					return $SteamID;
+				}
+			}
+			
 			switch( $Matches[ 1 ] )
 			{
 				case 'groups': $VanityType = self::VanityGroup; break;

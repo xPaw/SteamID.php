@@ -42,13 +42,10 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 1337, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeClan, $s->GetAccountType() );
 		
-		$s
-			->SetAccountUniverse( 0 )
-			->SetAccountUniverse( SteamID :: UniversePublic );
+		$s->SetAccountUniverse( SteamID :: UniversePublic );
 		
 		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
-		$this->assertEquals( 0, $s->GetAccountUniverse() );
 	}
 	
 	public function testLongConstructorAndSetterGetterValid( )
@@ -206,11 +203,18 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	
 	/**
 	 * @expectedException InvalidArgumentException
-	 * @expectedExceptionMessage vanity url
 	 */
 	public function testInvalidSetFromUrl( $URL )
 	{
 		SteamID::SetFromURL( 'http://steamcommunity.com/id/some_amazing_person/', [ $this, 'fakeResolveVanityURL' ] );
+	}
+	
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testInvalidNumericSteamIdSetFromUrl( $URL )
+	{
+		SteamID::SetFromURL( '31525201686561879', [ $this, 'fakeResolveVanityURL' ] );
 	}
 	
 	public function steam3StringProvider( )
