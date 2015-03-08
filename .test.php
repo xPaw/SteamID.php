@@ -255,7 +255,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		];
 	}
 	
-	public function vanityUrlProvider( )
+	public function invalidVanityUrlProvider( )
 	{
 		return
 		[
@@ -266,7 +266,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		];
 	}
 	
-	public function invalidVanityUrlProvider( )
+	public function vanityUrlProvider( )
 	{
 		return
 		[
