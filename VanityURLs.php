@@ -20,14 +20,14 @@ $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', functi
 	
 	$c = curl_init( );
 	
-	curl_setopt_array( $c, Array(
+	curl_setopt_array( $c, [
 		CURLOPT_USERAGENT      => 'Steam Vanity URL Lookup',
 		CURLOPT_ENCODING       => 'gzip',
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_URL            => 'https://api.steampowered.com/ISteamUser/ResolveVanityUR/v1/?' . http_build_query( $Parameters ),
 		CURLOPT_CONNECTTIMEOUT => 5,
 		CURLOPT_TIMEOUT        => 5
-	) );
+	] );
 	
 	$Response = curl_exec( $c );
 	

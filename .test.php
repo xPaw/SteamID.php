@@ -78,13 +78,20 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	{
 		$s = new SteamID( '[U:1:123]' );
 		
+		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( 123, $s->GetAccountID() );
 		$this->assertEquals( SteamID :: DesktopInstance, $s->GetAccountInstance() );
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeIndividual, $s->GetAccountType() );
 		
+		$s->SetAccountInstance( 1337 );
+		
+		$this->assertEquals( 1337, $s->GetAccountInstance() );
+		$this->assertFalse( $s->IsValid() );
+		
 		$s = new SteamID( '[A:1:123:456]' );
 		
+		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( 123, $s->GetAccountID() );
 		$this->assertEquals( 456, $s->GetAccountInstance() );
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
@@ -92,6 +99,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		
 		$s = new SteamID( '[L:1:123]' );
 		
+		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( 123, $s->GetAccountID() );
 		$this->assertTrue( !!( $s->GetAccountInstance() & SteamID :: InstanceFlagLobby ) );
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
@@ -99,10 +107,39 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		
 		$s = new SteamID( '[c:1:123]' );
 		
+		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( 123, $s->GetAccountID() );
 		$this->assertTrue( !!( $s->GetAccountInstance() & SteamID :: InstanceFlagClan ) );
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
+		
+		$s = new SteamID( '[g:1:456]' );
+		$s->SetAccountInstance( 1337 );
+		$s->SetAccountID( 0 );
+		
+		$this->assertFalse( $s->IsValid() );
+		$this->assertEquals( 0, $s->GetAccountID() );
+		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
+		$this->assertEquals( SteamID :: TypeClan, $s->GetAccountType() );
+		
+		$s = new SteamID( '[G:1:0]' );
+		$s->SetAccountInstance( 1337 );
+		
+		$this->assertFalse( $s->IsValid() );
+		$this->assertEquals( 0, $s->GetAccountID() );
+		$this->assertEquals( SteamID :: TypeGameServer, $s->GetAccountType() );
+	}
+	
+	public function testSteam2RenderIsValid( )
+	{
+		$s = new SteamID( '76561197969249708' );
+		$this->assertEquals( 'STEAM_0:0:4491990', $s->RenderSteam2() );
+		
+		$s->SetAccountUniverse( SteamID :: UniverseBeta );
+		$this->assertEquals( 'STEAM_2:0:4491990', $s->RenderSteam2() );
+		
+		$s->SetAccountType( SteamID :: TypeGameServer );
+		$this->assertEquals( '157625991261918636', $s->RenderSteam2() );
 	}
 	
 	/**
@@ -124,16 +161,23 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		new SteamID( $SteamID );
 	}
 	
-	public function testSteam2RenderIsValid( )
+	/**
+	 * @dataProvider invalidAccountIdsOverflowProvider
+	 * 
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testInvalidConstructorOverflow( $SteamID )
 	{
-		$s = new SteamID( '76561197969249708' );
-		$this->assertEquals( 'STEAM_0:0:4491990', $s->RenderSteam2() );
-		
-		$s->SetAccountUniverse( SteamID :: UniverseBeta );
-		$this->assertEquals( 'STEAM_2:0:4491990', $s->RenderSteam2() );
-		
-		$s->SetAccountType( SteamID :: TypeGameServer );
-		$this->assertEquals( '157625991261918636', $s->RenderSteam2() );
+		new SteamID( $SteamID );
+	}
+	
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testInvalidSetFromUInt64( $SteamID )
+	{
+		$s = new SteamID( 0 );
+		$s->SetFromUInt64( '111failure111' );
 	}
 	
 	/**
@@ -176,6 +220,15 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			[ 'STEAM_0:6:4491990' ],
 			[ 'STEAM_6:0:4491990' ],
 			[ -1 ],
+		];
+	}
+	
+	public function invalidAccountIdsOverflowProvider( )
+	{
+		return
+		[
+			[ '[U:1:9999999999999999999]' ],
+			[ 'STEAM_0:1:9999999999999999999' ],
 		];
 	}
 	
