@@ -32,14 +32,14 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID :: TypeContentServer, $s->GetAccountType() );
 		
 		$s = (new SteamID)
-			->SetAccountUniverse( 1337 )
+			->SetAccountUniverse( 255 )
 			->SetAccountType( SteamID :: TypeClan )
 			->SetAccountID( 4321 );
 		
 		$this->assertFalse( $s->IsValid() );
 		$this->assertEquals( 4321, $s->GetAccountID() );
 		$this->assertEquals( 0, $s->GetAccountInstance() );
-		$this->assertEquals( 1337, $s->GetAccountUniverse() );
+		$this->assertEquals( 255, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeClan, $s->GetAccountType() );
 		
 		$s->SetAccountUniverse( SteamID :: UniversePublic );
@@ -202,19 +202,14 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	}
 	
 	/**
+	 * @dataProvider invalidVanityUrlProvider
+	 *
 	 * @expectedException InvalidArgumentException
+	 * @expectedExceptionMessage vanity url
 	 */
 	public function testInvalidSetFromUrl( $URL )
 	{
-		SteamID::SetFromURL( 'http://steamcommunity.com/id/some_amazing_person/', [ $this, 'fakeResolveVanityURL' ] );
-	}
-	
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
-	public function testInvalidNumericSteamIdSetFromUrl( $URL )
-	{
-		SteamID::SetFromURL( '31525201686561879', [ $this, 'fakeResolveVanityURL' ] );
+		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 	}
 	
 	public function steam3StringProvider( )
@@ -261,6 +256,17 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	}
 	
 	public function vanityUrlProvider( )
+	{
+		return
+		[
+			[ '31525201686561879' ],
+			[ 'top_kek_person' ],
+			[ 'http://steamcommunity.com/id/some_amazing_person/' ],
+			[ 'https://steamcommunity.com/games/stanleyparable/' ]
+		];
+	}
+	
+	public function invalidVanityUrlProvider( )
 	{
 		return
 		[
