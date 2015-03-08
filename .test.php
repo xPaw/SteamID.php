@@ -141,7 +141,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	 */
 	public function testSetFromURL( $URL )
 	{
-		$s = SteamID::SetFromURL( $URL );
+		$s = SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 		$this->assertTrue( $s->IsValid() );
 	}
 	
