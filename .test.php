@@ -105,53 +105,23 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID :: TypeChat, $s->GetAccountType() );
 	}
 	
-	public function testSteam3StringSymmetric( )
+	/**
+	 * @dataProvider steam3StringProvider
+	 */
+	public function testSteam3StringSymmetric( $SteamID )
 	{
-		$Ids = Array(
-			'[U:1:123]',
-			'[U:1:123:2]',
-			'[G:1:626]',
-			'[A:2:165:1234]',
-			'[T:1:123]',
-			'[c:1:123]',
-			'[L:1:123]',
-		);
-		
-		foreach( $Ids as $SteamID )
-		{
-			$s = new SteamID( $SteamID );
-			$this->assertEquals( $SteamID, $s->RenderSteam3() );
-		}
+		$s = new SteamID( $SteamID );
+		$this->assertEquals( $SteamID, $s->RenderSteam3() );
 	}
 	
-	public function testConstructorHandlesInvalid( )
+	/**
+	 * @dataProvider invalidIdProvider
+	 *
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testConstructorHandlesInvalid( $SteamID )
 	{
-		$Ids = Array(
-			'',
-			'NOT A STEAMID!',
-			'STEAM_0:1:999999999999999999999999999999',
-			'[kek:1:0]',
-			'[Z:1:1]',
-			'[A:1:2:345)]',
-			'[A:1:2(345]',
-			'STEAM_0:6:4491990',
-			'STEAM_6:0:4491990',
-			-1
-		);
-		
-		foreach( $Ids as $SteamID )
-		{
-			try
-			{
-				new SteamID( $SteamID );
-			}
-			catch( InvalidArgumentException $e )
-			{
-				continue;
-			}
-			
-			$this->fail( 'An expected exception has not been raised for steamid "' . $SteamID . '".' );
-		}
+		new SteamID( $SteamID );
 	}
 	
 	public function testSteam2RenderIsValid( )
@@ -164,5 +134,34 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		
 		$s->SetAccountType( SteamID :: TypeGameServer );
 		$this->assertEquals( '157625991261918636', $s->RenderSteam2() );
+	}
+	
+	public function steam3StringProvider( )
+	{
+		return Array(
+			Array( '[U:1:123]' ),
+			Array( '[U:1:123:2]' ),
+			Array( '[G:1:626]' ),
+			Array( '[A:2:165:1234]' ),
+			Array( '[T:1:123]' ),
+			Array( '[c:1:123]' ),
+			Array( '[L:1:123]' ),
+		);
+	}
+	
+	public function invalidIdProvider( )
+	{
+		return Array(
+			Array( '' ),
+			Array( 'NOT A STEAMID!' ),
+			Array( 'STEAM_0:1:999999999999999999999999999999' ),
+			Array( '[kek:1:0]' ),
+			Array( '[Z:1:1]' ),
+			Array( '[A:1:2:345)]' ),
+			Array( '[A:1:2(345]' ),
+			Array( 'STEAM_0:6:4491990' ),
+			Array( 'STEAM_6:0:4491990' ),
+			Array( -1 ),
+		);
 	}
 }
