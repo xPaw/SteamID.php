@@ -122,8 +122,10 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeClan, $s->GetAccountType() );
 		
-		$s = new SteamID( '[G:1:0]' );
-		$s->SetAccountInstance( 1337 );
+		$s = new SteamID( '[G:1:1]' );
+		$this->assertTrue( $s->IsValid() );
+		
+		$s->SetAccountID( 0 );
 		
 		$this->assertFalse( $s->IsValid() );
 		$this->assertEquals( 0, $s->GetAccountID() );
