@@ -42,10 +42,13 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 1337, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeClan, $s->GetAccountType() );
 		
-		$s->SetAccountUniverse( SteamID :: UniversePublic );
+		$s
+			->SetAccountUniverse( 0 )
+			->SetAccountUniverse( SteamID :: UniversePublic );
 		
 		$this->assertTrue( $s->IsValid() );
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
+		$this->assertEquals( 0, $s->GetAccountUniverse() );
 	}
 	
 	public function testLongConstructorAndSetterGetterValid( )
@@ -164,6 +167,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	 * @dataProvider invalidIdProvider
 	 *
 	 * @expectedException InvalidArgumentException
+	 * @expectedException Provided SteamID is invalid
 	 */
 	public function testConstructorHandlesInvalid( $SteamID )
 	{
@@ -174,6 +178,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	 * @dataProvider invalidAccountIdsOverflowProvider
 	 * 
 	 * @expectedException InvalidArgumentException
+	 * @expectedExceptionMessage 32-bit
 	 */
 	public function testInvalidConstructorOverflow( $SteamID )
 	{
@@ -182,6 +187,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	
 	/**
 	 * @expectedException InvalidArgumentException
+	 * @expectedExceptionMessage not numeric
 	 */
 	public function testInvalidSetFromUInt64( )
 	{
@@ -196,6 +202,15 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	{
 		$s = SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 		$this->assertTrue( $s->IsValid() );
+	}
+	
+	/**
+	 * @expectedException InvalidArgumentException
+	 * @expectedExceptionMessage vanity url
+	 */
+	public function testInvalidSetFromUrl( $URL )
+	{
+		SteamID::SetFromURL( 'http://steamcommunity.com/id/some_amazing_person/', [ $this, 'fakeResolveVanityURL' ] );
 	}
 	
 	public function steam3StringProvider( )
@@ -236,8 +251,8 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	{
 		return
 		[
-			[ '[U:1:9999999999999999999]' ],
-			[ 'STEAM_0:1:9999999999999999999' ],
+			[ '[U:1:9999999999]' ],
+			[ 'STEAM_0:1:9999999999' ],
 		];
 	}
 	
@@ -258,6 +273,10 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
 			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
 			[ 'https://steamcommunity.com/profiles/76561210845167618' ],
+			[ '76561210845167618' ],
+			[ '[U:1:123]' ],
+			[ 'alfredr' ],
+			[ 'xpaw' ],
 		];
 	}
 	

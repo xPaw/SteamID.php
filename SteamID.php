@@ -113,9 +113,10 @@ class SteamID
 		{
 			$AccountID = $Matches[ 3 ];
 			
-			if( gmp_cmp( $AccountID, PHP_INT_MAX ) > 0 )
+			// Check for max unsigned 32-bit number
+			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
-				throw new InvalidArgumentException( 'Provided SteamID is invalid' );
+				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer' );
 			}
 			
 			$AuthServer = (int)$Matches[ 2 ];
@@ -131,9 +132,10 @@ class SteamID
 		{
 			$AccountID = $Matches[ 3 ];
 			
-			if( gmp_cmp( $AccountID, PHP_INT_MAX ) > 0 )
+			// Check for max unsigned 32-bit number
+			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
-				throw new InvalidArgumentException( 'Provided SteamID is invalid' );
+				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer' );
 			}
 			
 			$Type = $Matches[ 1 ];
@@ -390,7 +392,7 @@ class SteamID
 		}
 		else
 		{
-			throw new InvalidArgumentException( 'Provided SteamID is numeric' );
+			throw new InvalidArgumentException( 'Provided SteamID is not numeric' );
 		}
 		
 		return $this;
