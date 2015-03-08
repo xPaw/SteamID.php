@@ -23,7 +23,8 @@ class SteamID
 	/**
 	 * @var array Types of steam account
 	 */
-	private static $AccountTypeChars = Array(
+	private static $AccountTypeChars =
+	[
 		self::TypeAnonGameServer => 'A',
 		self::TypeGameServer     => 'G',
 		self::TypeMultiseat      => 'M',
@@ -34,7 +35,7 @@ class SteamID
 		self::TypeInvalid        => 'I',
 		self::TypeIndividual     => 'U',
 		self::TypeAnonUser       => 'a',
-	);
+	];
 	
 	/**
 	 * Steam universes. Each universe is a self-contained Steam instance.
@@ -75,6 +76,13 @@ class SteamID
 	const InstanceFlagClan     = 524288; // ( k_unSteamAccountInstanceMask + 1 ) >> 1
 	const InstanceFlagLobby    = 262144; // ( k_unSteamAccountInstanceMask + 1 ) >> 2
 	const InstanceFlagMMSLobby = 131072; // ( k_unSteamAccountInstanceMask + 1 ) >> 3
+	
+	/**
+	 * Vanity URL types used by ResolveVanityURL method.
+	 */
+	const VanityIndividual = 1;
+	const VanityGroup      = 2;
+	const VanityGameGroup  = 3;
 	
 	/**
 	 * @var resource
@@ -316,6 +324,54 @@ class SteamID
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Returns a SteamID instance constructed from a steamcommunity.com
+	 * URL form, or simply from a vanity url.
+	 *
+	 * Please note that you must implement vanity lookup function using
+	 * ISteamUser/ResolveVanityURL api interface yourself.
+	 *
+	 * Callback function must return resolved SteamID as a string,
+	 * or null if API returns success=42 (meaning no match).
+	 * 
+	 * It's up to you to throw any exceptions if you wish to do so.
+	 *
+	 * Example implementation is provided in `VanityURLs.php` file.
+	 *
+	 * @param string $Value Input URL
+	 * @param string $VanityCallback Callback which is called when a vanity lookup is required
+	 * 
+	 * @return SteamID Fluent interface
+	 * 
+	 * @throws InvalidArgumentException
+	 */
+	public static function SetFromURL( $Value, callable $VanityCallback )
+	{
+		if( preg_match( '/^https?:\/\/steamcommunity.com\/profiles\/(.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
+		{
+			$Value = $Matches[ 1 ];
+		}
+		else if( preg_match( '/^https?:\/\/steamcommunity.com\/(id|groups|games)\/([\w-]+)/', $Value, $Matches ) === 1
+		||       preg_match( '/^()([\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
+		{
+			switch( $Matches[ 1 ] )
+			{
+				case 'group': $VanityType = self::VanityGroup; break;
+				case 'games': $VanityType = self::VanityGameGroup; break;
+				default     : $VanityType = self::VanityIndividual;
+			}
+			
+			$Value = call_user_func( $VanityCallback, $Matches[ 2 ], $VanityType );
+			
+			if( $Value === null )
+			{
+				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID' );
+			}
+		}
+		
+		return new SteamID( $Value );
 	}
 	
 	/**

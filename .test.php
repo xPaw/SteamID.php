@@ -136,32 +136,97 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( '157625991261918636', $s->RenderSteam2() );
 	}
 	
+	/**
+	 * @dataProvider vanityURLProvider
+	 */
+	public function testSetFromURL( $URL )
+	{
+		$s = SteamID::SetFromURL( $URL );
+		$this->assertTrue( $s->IsValid() );
+	}
+	
 	public function steam3StringProvider( )
 	{
-		return Array(
-			Array( '[U:1:123]' ),
-			Array( '[U:1:123:2]' ),
-			Array( '[G:1:626]' ),
-			Array( '[A:2:165:1234]' ),
-			Array( '[T:1:123]' ),
-			Array( '[c:1:123]' ),
-			Array( '[L:1:123]' ),
-		);
+		return
+		[
+			[ '[U:1:123]' ],
+			[ '[U:1:123:2]' ],
+			[ '[G:1:626]' ],
+			[ '[A:2:165:1234]' ],
+			[ '[T:1:123]' ],
+			[ '[c:1:123]' ],
+			[ '[L:1:123]' ],
+		];
 	}
 	
 	public function invalidIdProvider( )
 	{
-		return Array(
-			Array( '' ),
-			Array( 'NOT A STEAMID!' ),
-			Array( 'STEAM_0:1:999999999999999999999999999999' ),
-			Array( '[kek:1:0]' ),
-			Array( '[Z:1:1]' ),
-			Array( '[A:1:2:345)]' ),
-			Array( '[A:1:2(345]' ),
-			Array( 'STEAM_0:6:4491990' ),
-			Array( 'STEAM_6:0:4491990' ),
-			Array( -1 ),
-		);
+		return
+		[
+			[ '' ],
+			[ 'NOT A STEAMID!' ],
+			[ 'STEAM_0:1:999999999999999999999999999999' ],
+			[ '[kek:1:0]' ],
+			[ '[Z:1:1]' ],
+			[ '[A:1:2:345)]' ],
+			[ '[A:1:2(345]' ],
+			[ '[A:1:2:(345]' ],
+			[ '[A:1:2:(345)]' ],
+			[ '[A:1:2(345):]' ],
+			[ 'STEAM_0:6:4491990' ],
+			[ 'STEAM_6:0:4491990' ],
+			[ -1 ],
+		];
+	}
+	
+	public function vanityURLProvider( )
+	{
+		return
+		[
+			[ 'http://steamcommunity.com/id/xpaw/' ],
+			[ 'https://steamcommunity.com/id/alfredr/' ],
+			[ 'https://steamcommunity.com/id/alfredr/games' ],
+			[ 'http://steamcommunity.com/groups/valve/' ],
+			[ 'http://steamcommunity.com/groups/valve/memberslistxml' ],
+			[ 'http://steamcommunity.com/games/dota2' ],
+			[ 'http://steamcommunity.com/games/tf2/' ],
+			[ 'http://steamcommunity.com/profiles/[U:1:2:3]/' ],
+			[ 'https://steamcommunity.com/profiles/[U:4:2]/games' ],
+			[ 'http://steamcommunity.com/profiles/76561197960265733' ],
+			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
+			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
+			[ 'https://steamcommunity.com/profiles/364791574111977474' ],
+		];
+	}
+	
+	public function fakeResolveVanityURL( $URL, $Type )
+	{
+		$FakeValues =
+		[
+			1 => // individual
+			[
+				'alfredr' => '76561197960265733',
+				'xpaw' => '76561197972494985'
+			],
+			
+			2 => // group
+			[
+				'valve' => '103582791429521412',
+				'steamdb' => '103582791434298690'
+			],
+			
+			3 => // game group
+			[
+				'tf2' => '103582791430075519',
+				'dota2' => '103582791433224455'
+			],
+		];
+		
+		if( isset( $FakeValues[ $Type ][ $URL ] ) )
+		{
+			return $FakeValues[ $Type ][ $URL ];
+		}
+		
+		return null;
 	}
 }
