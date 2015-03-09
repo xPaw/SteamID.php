@@ -356,8 +356,8 @@ class SteamID
 		{
 			$Value = $Matches[ 1 ];
 		}
-		else if( preg_match( '/^https?:\/\/steamcommunity.com\/(id|groups|games)\/([\w-]+)/', $Value, $Matches ) === 1
-		||       preg_match( '/^()([\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
+		else if( preg_match( '/^https?:\/\/steamcommunity.com\/(id|groups|games)\/([\w-]{2,32})(?:\/|$)/', $Value, $Matches ) === 1
+		||       preg_match( '/^()([\w-]{2,32})$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
 		{
 			// Steam doesn't allow vanity urls to be valid steamids
 			if( is_numeric( $Matches[ 2 ] ) )

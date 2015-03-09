@@ -262,7 +262,9 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			[ '31525201686561879' ],
 			[ 'top_kek_person' ],
 			[ 'http://steamcommunity.com/id/some_amazing_person/' ],
-			[ 'https://steamcommunity.com/games/stanleyparable/' ]
+			[ 'https://steamcommunity.com/games/stanleyparable/' ],
+			[ 'http://steamcommunity.com/id/a/' ],
+			[ 'http://steamcommunity.com/id/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/' ],
 		];
 	}
 	
