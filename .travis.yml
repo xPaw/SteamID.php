@@ -8,3 +8,8 @@ php:
 script: phpunit --configuration .phpunit.xml --verbose
 notifications:
   email: false
+addons:
+  code_climate:
+    repo_token: 24890aa99b796be983cd8569fd2a2e0f7d2e6196175a15d4dfd2c77533a9e577
+after_script:
+  - vendor/bin/test-reporter
