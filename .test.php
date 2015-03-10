@@ -31,6 +31,11 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID :: UniverseInternal, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID :: TypeContentServer, $s->GetAccountType() );
 		
+		$s->SetAccountType( 15 );
+		
+		$this->assertFalse( $s->IsValid() );
+		$this->assertEquals( 15, $s->GetAccountType() );
+		
 		$s = (new SteamID)
 			->SetAccountUniverse( 255 )
 			->SetAccountType( SteamID :: TypeClan )
