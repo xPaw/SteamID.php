@@ -1,4 +1,4 @@
-# SteamID.php [![Build Status](https://travis-ci.org/xPaw/SteamID.php.svg?branch=master)](https://travis-ci.org/xPaw/SteamID.php)
+# SteamID.php [![Build Status](https://travis-ci.org/xPaw/SteamID.php.svg?branch=master)](https://travis-ci.org/xPaw/SteamID.php) [![Test Coverage](https://codeclimate.com/github/xPaw/SteamID.php/badges/coverage.svg)](https://codeclimate.com/github/xPaw/SteamID.php)
 
 This 64bit structure is used for identifying various objects on the Steam 
 network. This library provides an easy way to work with SteamIDs and makes 
