@@ -178,7 +178,7 @@ class SteamID
 			$this->SetAccountInstance( $InstanceID );
 			$this->SetAccountID( (int)$AccountID );
 		}
-		else if( self::IsNumeric( $Value ) && $Value >= 0 )
+		else if( self::IsNumeric( $Value ) )
 		{
 			$this->Data = gmp_init( $Value, 10 );
 		}
@@ -582,5 +582,6 @@ class SteamID
 	 */
 	private static function IsNumeric( $n )
 	{
+		return preg_match( '/^[1-9][0-9]{0,19}$/', $n ) === 1;
 	}
 }
