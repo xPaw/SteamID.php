@@ -178,7 +178,7 @@ class SteamID
 			$this->SetAccountInstance( $InstanceID );
 			$this->SetAccountID( (int)$AccountID );
 		}
-		else if( is_numeric( $Value ) && $Value >= 0 )
+		else if( self::IsNumeric( $Value ) && $Value >= 0 )
 		{
 			$this->Data = gmp_init( $Value, 10 );
 		}
@@ -367,7 +367,7 @@ class SteamID
 			}
 			
 			// Steam doesn't allow vanity urls to be valid steamids
-			if( is_numeric( $Matches[ 2 ] ) )
+			if( self::IsNumeric( $Matches[ 2 ] ) )
 			{
 				$SteamID = new SteamID( $Matches[ 2 ] );
 				
@@ -406,7 +406,7 @@ class SteamID
 	 */
 	public function SetFromUInt64( $Value )
 	{
-		if( is_numeric( $Value ) )
+		if( self::IsNumeric( $Value ) )
 		{
 			$this->Data = gmp_init( $Value, 10 );
 		}
@@ -575,5 +575,12 @@ class SteamID
 	private static function ShiftRight( $x, $n )
 	{
 		return gmp_div( $x, gmp_pow( 2, $n ) );
+	}
+	
+	/**
+	 * This is way more restrictive than php's is_numeric()
+	 */
+	private static function IsNumeric( $n )
+	{
 	}
 }
