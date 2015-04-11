@@ -193,7 +193,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	 */
 	public function testInvalidSetFromUInt64( )
 	{
-		$s = new SteamID( 0 );
+		$s = new SteamID( );
 		$s->SetFromUInt64( '111failure111' );
 	}
 	
@@ -235,6 +235,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	{
 		return
 		[
+			[ 0 ],
 			[ '' ],
 			[ 'NOT A STEAMID!' ],
 			[ 'STEAM_0:1:999999999999999999999999999999' ],
