@@ -116,7 +116,7 @@ class SteamID
 			// Check for max unsigned 32-bit number
 			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
-				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer' );
+				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
 			
 			$AuthServer = (int)$Matches[ 2 ];
@@ -135,7 +135,7 @@ class SteamID
 			// Check for max unsigned 32-bit number
 			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
-				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer' );
+				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
 			
 			$Type = $Matches[ 1 ];
@@ -184,7 +184,7 @@ class SteamID
 		}
 		else
 		{
-			throw new InvalidArgumentException( 'Provided SteamID is invalid' );
+			throw new InvalidArgumentException( 'Provided SteamID is invalid.' );
 		}
 	}
 	
@@ -363,7 +363,7 @@ class SteamID
 			
 			if( $Length < 2 || $Length > 32 )
 			{
-				throw new InvalidArgumentException( 'Provided vanity url has bad length' );
+				throw new InvalidArgumentException( 'Provided vanity url has bad length.' );
 			}
 			
 			// Steam doesn't allow vanity urls to be valid steamids
@@ -388,7 +388,7 @@ class SteamID
 			
 			if( $Value === null )
 			{
-				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID' );
+				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.' );
 			}
 		}
 		
@@ -412,7 +412,7 @@ class SteamID
 		}
 		else
 		{
-			throw new InvalidArgumentException( 'Provided SteamID is not numeric' );
+			throw new InvalidArgumentException( 'Provided SteamID is not numeric.' );
 		}
 		
 		return $this;
