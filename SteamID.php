@@ -180,7 +180,7 @@ class SteamID
 		}
 		else if( is_numeric( $Value ) && $Value >= 0 )
 		{
-			$this->Data = gmp_init( $Value );
+			$this->Data = gmp_init( $Value, 10 );
 		}
 		else
 		{
@@ -408,7 +408,7 @@ class SteamID
 	{
 		if( is_numeric( $Value ) )
 		{
-			$this->Data = gmp_init( $Value );
+			$this->Data = gmp_init( $Value, 10 );
 		}
 		else
 		{
