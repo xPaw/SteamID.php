@@ -2,7 +2,7 @@
 	"name": "xpaw/steamid",
 	"description": "SteamID conversion library",
 	"minimum-stability": "stable",
-	"license": "LGPL",
+	"license": "MIT",
 	"authors":
 	[
 		{

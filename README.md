@@ -173,4 +173,4 @@ After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or
 
 ## License
 
-LGPL v2.1. See [LICENSE](LICENSE) file for more information.
+[MIT](LICENSE).

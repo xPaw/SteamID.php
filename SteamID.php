@@ -12,10 +12,10 @@
  * {@link https://github.com/SteamRE/SteamKit/blob/master/SteamKit2/SteamKit2/Types/SteamID.cs}
  *
  * GitHub: {@link https://github.com/xPaw/SteamID.php}
- * Website: {@link http://xpaw.me}
+ * Website: {@link https://xpaw.me}
  *
  * @author xPaw
- * @license LGPL
+ * @license MIT
  * @version 0.0.1
  */
 class SteamID
