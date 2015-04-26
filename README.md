@@ -1,4 +1,4 @@
-# SteamID.php [![Build Status](https://travis-ci.org/xPaw/SteamID.php.svg?branch=master)](https://travis-ci.org/xPaw/SteamID.php) [![Test Coverage](https://codeclimate.com/github/xPaw/SteamID.php/badges/coverage.svg)](https://codeclimate.com/github/xPaw/SteamID.php)
+# SteamID.php [![Build Status](https://img.shields.io/travis/xPaw/SteamID.php.svg)](https://travis-ci.org/xPaw/SteamID.php) [![Test Coverage](https://img.shields.io/codeclimate/coverage/github/xPaw/SteamID.php.svg)](https://codeclimate.com/github/xPaw/SteamID.php) [![Packagist](https://img.shields.io/packagist/dt/xpaw/steamid.svg)](https://packagist.org/packages/xpaw/steamid)
 
 This 64bit structure is used for identifying various objects on the Steam 
 network. This library provides an easy way to work with SteamIDs and makes 
@@ -173,4 +173,4 @@ After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE)
