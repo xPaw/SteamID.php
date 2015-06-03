@@ -436,7 +436,7 @@ class SteamID
 	 */
 	public function GetAccountID()
 	{
-		return gmp_intval( $this->Get( 0, '0xFFFFFFFF' ) );
+		return gmp_intval( $this->Get( 0, '4294967295' ) ); // 4294967295 = 0xFFFFFFFF
 	}
 	
 	/**
@@ -446,7 +446,7 @@ class SteamID
 	 */
 	public function GetAccountInstance()
 	{
-		return gmp_intval( $this->Get( 32, '0xFFFFF' ) );
+		return gmp_intval( $this->Get( 32, '1048575' ) ); // 1048575 = 0xFFFFF
 	}
 	
 	/**
@@ -456,7 +456,7 @@ class SteamID
 	 */
 	public function GetAccountType()
 	{
-		return gmp_intval( $this->Get( 52, '0xF' ) );
+		return gmp_intval( $this->Get( 52, '15' ) ); // 15 = 0xF
 	}
 	
 	/**
@@ -466,7 +466,7 @@ class SteamID
 	 */
 	public function GetAccountUniverse()
 	{
-		return gmp_intval( $this->Get( 56, '0xFF' ) );
+		return gmp_intval( $this->Get( 56, '255' ) ); // 255 = 0xFF
 	}
 	
 	/**
@@ -478,7 +478,7 @@ class SteamID
 	 */
 	public function SetAccountID( $Value )
 	{
-		$this->Set( 0, '0xFFFFFFFF', $Value );
+		$this->Set( 0, '4294967295', $Value ); // 4294967295 = 0xFFFFFFFF
 		
 		return $this;
 	}
@@ -492,7 +492,7 @@ class SteamID
 	 */
 	public function SetAccountInstance( $Value )
 	{
-		$this->Set( 32, '0xFFFFF', $Value );
+		$this->Set( 32, '1048575', $Value ); // 1048575 = 0xFFFFF
 		
 		return $this;
 	}
@@ -506,7 +506,7 @@ class SteamID
 	 */
 	public function SetAccountType( $Value )
 	{
-		$this->Set( 52, '0xF', $Value );
+		$this->Set( 52, '15', $Value ); // 15 = 0xF
 		
 		return $this;
 	}
@@ -520,7 +520,7 @@ class SteamID
 	 */
 	public function SetAccountUniverse( $Value )
 	{
-		$this->Set( 56, '0xFF', $Value );
+		$this->Set( 56, '255', $Value ); // 255 = 0xFF
 		
 		return $this;
 	}
