@@ -13,7 +13,7 @@
 	"require":
 	{
 		"php": ">=5.4",
-		"ext-gmp": "*",
+		"ext-gmp": "*"
 	},
 	"require-dev":
 	{
@@ -22,7 +22,8 @@
 	},
 	"autoload":
 	{
-		"files": [
+		"files": 
+		[
 			"SteamID.php"
 		]
 	}
