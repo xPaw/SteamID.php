@@ -128,7 +128,7 @@ class SteamID
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', $Value, $Matches ) === 1 )
+		else if( preg_match( '/^\\[([AGMPCgcLTIUa]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', $Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
 			
@@ -231,7 +231,7 @@ class SteamID
 		$AccountType = $this->GetAccountType();
 		$AccountTypeChar = isset( self::$AccountTypeChars[ $AccountType ] ) ? 
 			self::$AccountTypeChars[ $AccountType ] : 
-			'i';
+			'I';
 		
 		$RenderInstance = false;
 		
