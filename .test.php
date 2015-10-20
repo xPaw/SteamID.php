@@ -146,10 +146,12 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertNotEquals( 15, $s->GetAccountType() );
 		
 		$s->SetAccountType( 15 );
+		$s->SetAccountUniverse( 200 );
 		
 		$this->assertFalse( $s->IsValid() );
 		$this->assertEquals( 15, $s->GetAccountType() );
-		$this->assertEquals( '[i:15:0:1337]', $s->RenderSteam3() );
+		$this->assertEquals( 200, $s->GetAccountUniverse() );
+		$this->assertEquals( '[i:200:0]', $s->RenderSteam3() );
 	}
 	
 	public function testSteam3CorrectInvalidParse( )
