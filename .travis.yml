@@ -3,8 +3,7 @@ php:
   - 5.4
   - 5.5
   - 5.6
-  - hhvm
-  - nightly
+  - 7.0
 
 notifications:
   email: false
@@ -14,4 +13,4 @@ install:
 script:
   - phpunit --configuration .phpunit.xml --verbose
 after_script:
-  - ./.codeclimate.sh
+  - php vendor/bin/test-reporter

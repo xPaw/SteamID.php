@@ -1,5 +1,21 @@
-languages:
-  PHP: true
+---
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - php
+  fixme:
+    enabled: true
+  phpmd:
+    enabled: true
+    checks:
+      Controversial/CamelCaseVariableName:
+        enabled: false
+ratings:
+  paths:
+  - "**.php"
 exclude_paths:
+- tests/
 - ".test.php"
 - "VanityURLs.php"
