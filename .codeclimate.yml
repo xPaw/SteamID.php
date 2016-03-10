@@ -10,6 +10,8 @@ engines:
   phpmd:
     enabled: true
     checks:
+      Controversial/CamelCaseMethodName:
+        enabled: false
       Controversial/CamelCaseVariableName:
         enabled: false
 ratings:

@@ -83,6 +83,12 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 8983981, $s->GetAccountID() );
 		$this->assertEquals( SteamID :: DesktopInstance, $s->GetAccountInstance() );
 		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
+		
+		$s = new SteamID( 'STEAM_1:1:4491990' );
+		
+		$this->assertEquals( 8983981, $s->GetAccountID() );
+		$this->assertEquals( SteamID :: DesktopInstance, $s->GetAccountInstance() );
+		$this->assertEquals( SteamID :: UniversePublic, $s->GetAccountUniverse() );
 	}
 	
 	public function testSteam3CorrectParse( )
@@ -164,6 +170,9 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	public function testSteam2RenderIsValid( )
 	{
 		$s = new SteamID( '76561197969249708' );
+		$this->assertEquals( 'STEAM_1:0:4491990', $s->RenderSteam2() );
+		
+		$s->SetAccountUniverse( SteamID :: UniverseInvalid );
 		$this->assertEquals( 'STEAM_0:0:4491990', $s->RenderSteam2() );
 		
 		$s->SetAccountUniverse( SteamID :: UniverseBeta );

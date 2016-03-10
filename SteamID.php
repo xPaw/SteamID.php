@@ -118,10 +118,18 @@ class SteamID
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
 			
+			$Universe = (int)$Matches[ 1 ];
+			
+			// Games before orange box used to incorrectly display universe as 0, we support that
+			if( $Universe === self::UniverseInvalid )
+			{
+				$Universe = self::UniversePublic;
+			}
+			
 			$AuthServer = (int)$Matches[ 2 ];
 			$AccountID = ( (int)$AccountID << 1 ) | $AuthServer;
 			
-			$this->SetAccountUniverse( self::UniversePublic );
+			$this->SetAccountUniverse( $Universe );
 			$this->SetAccountInstance( self::DesktopInstance );
 			$this->SetAccountType( self::TypeIndividual );
 			$this->SetAccountID( $AccountID );
@@ -205,13 +213,6 @@ class SteamID
 			case self::TypeIndividual:
 			{
 				$Universe = $this->GetAccountUniverse();
-				
-				if( $Universe === self::UniversePublic )
-				{
-					// They're both STEAM_0
-					$Universe = self::UniverseInvalid;
-				}
-				
 				$AccountID = $this->GetAccountID();
 				
 				return 'STEAM_' . $Universe . ':' . ( $AccountID & 1 ) . ':' . 
