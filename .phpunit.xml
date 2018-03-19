@@ -5,6 +5,11 @@
 			<file>./.test.php</file>
 		</testsuite>
 	</testsuites>
+	<filter>
+		<whitelist processUncoveredFilesFromWhitelist="true">
+			<file>./SteamID.php</file>
+		</whitelist>
+	</filter>
 	<logging>
 		<log type="coverage-clover" target="build/logs/clover.xml"/>
 	</logging>
