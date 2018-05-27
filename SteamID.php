@@ -85,7 +85,7 @@ class SteamID
 	const VanityGameGroup  = 3;
 	
 	/**
-	 * @var resource
+	 * @var \GMP
 	 */
 	private $Data;
 	
@@ -94,9 +94,7 @@ class SteamID
 	 *
 	 * It automatically guesses which type the input is, and works from there.
 	 *
-	 * @param string|null $Value
-	 * 
-	 * @return SteamID Instance of SteamID class
+	 * @param int|string|null $Value
 	 */
 	public function __construct( $Value = null )
 	{
@@ -403,7 +401,7 @@ class SteamID
 	/**
 	 * Sets the various components of this SteamID from a 64bit integer form.
 	 *
-	 * @param int $Value The 64bit integer to assign this SteamID from.
+	 * @param int|string $Value The 64bit integer to assign this SteamID from.
 	 * 
 	 * @return SteamID Fluent interface
 	 * 
@@ -532,9 +530,9 @@ class SteamID
 	
 	/**
 	 * @param int $BitOffset
-	 * @param int $ValueMask
+	 * @param int|string $ValueMask
 	 * 
-	 * @return resource
+	 * @return \GMP
 	 */
 	private function Get( $BitOffset, $ValueMask )
 	{
@@ -543,7 +541,7 @@ class SteamID
 	
 	/**
 	 * @param int $BitOffset
-	 * @param int $ValueMask
+	 * @param int|string $ValueMask
 	 * @param int $Value
 	 * 
 	 * @return void
@@ -559,10 +557,10 @@ class SteamID
 	/**
 	 * Shift the bits of $x by $n steps to the left
 	 * 
-	 * @param int|resource $x
+	 * @param int|\GMP $x
 	 * @param int $n
 	 *
-	 * @return resource
+	 * @return \GMP
 	 */
 	private static function ShiftLeft( $x, $n )
 	{
@@ -572,14 +570,14 @@ class SteamID
 	/**
 	 * Shift the bits of $x by $n steps to the right
 	 * 
-	 * @param int|resource $x
+	 * @param int|\GMP $x
 	 * @param int$n
 	 *
-	 * @return resource
+	 * @return \GMP
 	 */
 	private static function ShiftRight( $x, $n )
 	{
-		return gmp_div( $x, gmp_pow( 2, $n ) );
+		return gmp_div_q( $x, gmp_pow( 2, $n ) );
 	}
 	
 	/**
@@ -587,6 +585,6 @@ class SteamID
 	 */
 	private static function IsNumeric( $n )
 	{
-		return preg_match( '/^[1-9][0-9]{0,19}$/', $n ) === 1;
+		return preg_match( '/^[1-9][0-9]{0,19}$/', (string)$n ) === 1;
 	}
 }
