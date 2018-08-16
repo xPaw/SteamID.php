@@ -37,6 +37,47 @@ class SteamID
 	];
 	
 	/**
+	 * @var string List of characters used in /user/ URLs
+	 */
+	private static $SteamInviteDictionaryString = 'bcdfghjkmnpqrtvw';
+	
+	/**
+	 * @var array List of characters that can be mapped from /user/ URLs
+	 */
+	private static $SteamInviteDictionary =
+	[
+		'b' => 0,
+		'c' => 1,
+		'd' => 2,
+		'f' => 3,
+		'g' => 4,
+		'h' => 5,
+		'j' => 6,
+		'k' => 7,
+		'm' => 8,
+		'n' => 9,
+		'p' => 10,
+		'q' => 11,
+		'r' => 12,
+		't' => 13,
+		'v' => 14,
+		'w' => 15,
+
+		'a' => 10,
+		'e' => 14,
+		'0' => 0,
+		'1' => 1,
+		'2' => 2,
+		'3' => 3,
+		'4' => 4,
+		'5' => 5,
+		'6' => 6,
+		'7' => 7,
+		'8' => 8,
+		'9' => 9,
+	];
+	
+	/**
 	 * Steam universes. Each universe is a self-contained Steam instance.
 	 */
 	const UniverseInvalid  = 0;
@@ -280,6 +321,46 @@ class SteamID
 	}
 	
 	/**
+	 * Renders this instance into Steam's new invite code. Which can be formatted as:
+	 * http://s.team/p/%s
+	 * https://steamcommunity.com/user/%s
+	 *
+	 * @return string A Steam invite code which can be used in a URL.
+	 */
+	public function RenderSteamInvite()
+	{
+		switch( $this->GetAccountType() )
+		{
+			case self::TypeInvalid:
+			case self::TypeIndividual:
+			{
+				$AccountID = $this->GetAccountID();
+				$Code = '';
+				
+				while( $AccountID > 0 )
+				{
+					$AccountID = ( $AccountID - $SteamInviteDictionaryString[ $AccountID % 16 ] ) / 16;
+					$Code = $Value . $Code;
+				}
+				
+				$Length = strlen( $Code );
+				
+				// TODO: We don't know when Valve starts inserting the dash
+				if( $Length > 3 )
+				{
+					$Code = substr_replace( $Code, '-', (int)( $Length / 2 ), 0 );
+				}
+				
+				return $Code;
+			}
+			default:
+			{
+				throw new InvalidArgumentException( 'This can only be used on Individual SteamID.' );
+			}
+		}
+	}
+	
+	/**
 	 * Gets a value indicating whether this instance is valid.
 	 *
 	 * @return bool true if this instance is valid; otherwise, false.
@@ -355,11 +436,11 @@ class SteamID
 	 */
 	public static function SetFromURL( $Value, callable $VanityCallback )
 	{
-		if( preg_match( '/^https?:\/\/steamcommunity.com\/profiles\/(.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
+		if( preg_match( '/^https?:\/\/steamcommunity\.com\/profiles\/(.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
 			$Value = $Matches[ 1 ];
 		}
-		else if( preg_match( '/^https?:\/\/steamcommunity.com\/(id|groups|games)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1
+		else if( preg_match( '/^https?:\/\/steamcommunity\.com\/(id|groups|games)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1
 		||       preg_match( '/^()([\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
 		{
 			$Length = strlen( $Matches[ 2 ] );
@@ -393,6 +474,24 @@ class SteamID
 			{
 				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.' );
 			}
+		}
+		else if( preg_match( '/^https?:\/\/(steamcommunity\.com\/user|s\.team\/p)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
+		{
+			$Value = strtolower( $Matches[ 1 ] );
+			$Length = strlen( $Value );
+			$AccountID = 0;
+			
+			for( $i = 0; $i < $Length; $i++ )
+			{
+				if( !isset( self::$SteamInviteDictionary[ $Value[ $i ] ] ) )
+				{
+					continue;
+				}
+				
+				$AccountID = self::$SteamInviteDictionary[ $Value[ $i ] ] + $AccountID * 16;
+			}
+			
+			$Value = '[U:1:' . $AccountID . ']';
 		}
 		
 		return new SteamID( $Value );

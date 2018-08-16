@@ -233,6 +233,30 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	}
 	
 	/**
+	 * @dataProvider inviteUrlProvider
+	 */
+	public function testSetFromInviteUrl( $URL )
+	{
+		$s = SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
+		$this->assertEquals( '[U:1:12229257]', $s->RenderSteam3() );
+	}
+	
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
+	public function testInvalidSteamInviteType( )
+	{
+		$a = new SteamID( '[A:2:165:1234]' );
+		$a->RenderSteamInvite();
+	}
+	
+	public function testRenderSteamInvite( )
+	{
+		$a = new SteamID( '[U:1:12229257]' );
+		$this->assertEquals( 'qgd-nwhk', $a->RenderSteamInvite() );
+	}
+	
+	/**
 	 * @dataProvider invalidVanityUrlProvider
 	 *
 	 * @expectedException InvalidArgumentException
@@ -297,6 +321,8 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			[ 'https://steamcommunity.com/games/stanleyparable/' ],
 			[ 'http://steamcommunity.com/id/a/' ],
 			[ 'http://steamcommunity.com/id/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/' ],
+			[ 'http://steamcommunity_com/id/xpaw/' ],
+			[ 'https://steamcommunity,com/profiles/76561210845167618' ],
 		];
 	}
 	
@@ -321,6 +347,18 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			[ '[U:1:123]' ],
 			[ 'alfredr' ],
 			[ 'xpaw' ],
+		];
+	}
+	
+	public function inviteUrlProvider( )
+	{
+		return
+		[
+			[ 'http://steamcommunity.com/user/qpn-pmn/' ],
+			[ 'https://steamcommunity.com/user/QPNpmn--/' ],
+			[ 'http://s.team/p/qpn-pmn/abc' ],
+			[ 'https://s.team/p/qpnpmn' ],
+			[ 'https://s.team/p/qpnpmn-W' ],
 		];
 	}
 	
