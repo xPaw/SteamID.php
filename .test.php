@@ -253,7 +253,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	public function testRenderSteamInvite( )
 	{
 		$a = new SteamID( '[U:1:12229257]' );
-		$this->assertEquals( 'qgd-nwhk', $a->RenderSteamInvite() );
+		$this->assertEquals( 'qpn-pmn', $a->RenderSteamInvite() );
 		
 		$a = new SteamID( '[U:1:819]' );
 		$this->assertEquals( 'fff', $a->RenderSteamInvite() );
@@ -263,7 +263,6 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	 * @dataProvider invalidVanityUrlProvider
 	 *
 	 * @expectedException InvalidArgumentException
-	 * @expectedExceptionMessage vanity url
 	 */
 	public function testInvalidSetFromUrl( $URL )
 	{
@@ -326,6 +325,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 			[ 'http://steamcommunity.com/id/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/' ],
 			[ 'http://steamcommunity_com/id/xpaw/' ],
 			[ 'https://steamcommunity,com/profiles/76561210845167618' ],
+			[ 'https://google.com' ],
 		];
 	}
 	
