@@ -254,6 +254,9 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	{
 		$a = new SteamID( '[U:1:12229257]' );
 		$this->assertEquals( 'qgd-nwhk', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:819]' );
+		$this->assertEquals( 'fff', $a->RenderSteamInvite() );
 	}
 	
 	/**
@@ -356,9 +359,10 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		[
 			[ 'http://steamcommunity.com/user/qpn-pmn/' ],
 			[ 'https://steamcommunity.com/user/QPNpmn--/' ],
+			[ 'https://steamcommunity.com/user/qpn-pmllllllllllln/' ],
 			[ 'http://s.team/p/qpn-pmn/abc' ],
 			[ 'https://s.team/p/qpnpmn' ],
-			[ 'https://s.team/p/qpnpmn-W' ],
+			[ 'https://s.team/p/qpnpmn-YZ' ],
 		];
 	}
 	

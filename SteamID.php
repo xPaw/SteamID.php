@@ -339,8 +339,9 @@ class SteamID
 				
 				while( $AccountID > 0 )
 				{
-					$AccountID = ( $AccountID - $SteamInviteDictionaryString[ $AccountID % 16 ] ) / 16;
-					$Code = $Value . $Code;
+					$Value = $AccountID % 16;
+					$AccountID = ( $AccountID - $Value ) / 16;
+					$Code = self::$SteamInviteDictionaryString[ $Value ] . $Code;
 				}
 				
 				$Length = strlen( $Code );
@@ -477,7 +478,7 @@ class SteamID
 		}
 		else if( preg_match( '/^https?:\/\/(steamcommunity\.com\/user|s\.team\/p)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
-			$Value = strtolower( $Matches[ 1 ] );
+			$Value = strtolower( $Matches[ 2 ] );
 			$Length = strlen( $Value );
 			$AccountID = 0;
 			
