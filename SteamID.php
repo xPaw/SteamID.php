@@ -37,44 +37,26 @@ class SteamID
 	];
 	
 	/**
-	 * @var string List of characters used in /user/ URLs
-	 */
-	private static $SteamInviteDictionaryString = 'bcdfghjkmnpqrtvw';
-	
-	/**
-	 * @var array List of characters that can be mapped from /user/ URLs
+	 * @var array List of replacement hex characters used in /user/ URLs
 	 */
 	private static $SteamInviteDictionary =
 	[
-		'b' => 0,
-		'c' => 1,
-		'd' => 2,
-		'f' => 3,
-		'g' => 4,
-		'h' => 5,
-		'j' => 6,
-		'k' => 7,
-		'm' => 8,
-		'n' => 9,
-		'p' => 10,
-		'q' => 11,
-		'r' => 12,
-		't' => 13,
-		'v' => 14,
-		'w' => 15,
-
-		'a' => 10,
-		'e' => 14,
-		'0' => 0,
-		'1' => 1,
-		'2' => 2,
-		'3' => 3,
-		'4' => 4,
-		'5' => 5,
-		'6' => 6,
-		'7' => 7,
-		'8' => 8,
-		'9' => 9,
+		'0' => 'b',
+		'1' => 'c',
+		'2' => 'd',
+		'3' => 'f',
+		'4' => 'g',
+		'5' => 'h',
+		'6' => 'j',
+		'7' => 'k',
+		'8' => 'm',
+		'9' => 'n',
+		'a' => 'p',
+		'b' => 'q',
+		'c' => 'r',
+		'd' => 't',
+		'e' => 'v',
+		'f' => 'w',
 	];
 	
 	/**
@@ -334,16 +316,8 @@ class SteamID
 			case self::TypeInvalid:
 			case self::TypeIndividual:
 			{
-				$AccountID = $this->GetAccountID();
-				$Code = '';
-				
-				while( $AccountID > 0 )
-				{
-					$Value = $AccountID % 16;
-					$AccountID = ( $AccountID - $Value ) / 16;
-					$Code = self::$SteamInviteDictionaryString[ $Value ] . $Code;
-				}
-				
+				$Code = dechex( $this->GetAccountID() );
+				$Code = strtr( $Code, self::$SteamInviteDictionary );
 				$Length = strlen( $Code );
 				
 				// TODO: We don't know when Valve starts inserting the dash
@@ -479,20 +453,12 @@ class SteamID
 		else if( preg_match( '/^https?:\/\/(steamcommunity\.com\/user|s\.team\/p)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
 			$Value = strtolower( $Matches[ 2 ] );
-			$Length = strlen( $Value );
-			$AccountID = 0;
+			$Value = strtr( $Value, array_flip( self::$SteamInviteDictionary ) );
 			
-			for( $i = 0; $i < $Length; $i++ )
-			{
-				if( !isset( self::$SteamInviteDictionary[ $Value[ $i ] ] ) )
-				{
-					continue;
-				}
-				
-				$AccountID = self::$SteamInviteDictionary[ $Value[ $i ] ] + $AccountID * 16;
-			}
+			// hexdec() will ignore any non-hexadecimal characters it encounters.
+			$Value = hexdec( $Value );
 			
-			$Value = '[U:1:' . $AccountID . ']';
+			$Value = '[U:1:' . $Value . ']';
 		}
 		
 		return new SteamID( $Value );

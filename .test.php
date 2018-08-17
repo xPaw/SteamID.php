@@ -257,6 +257,55 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		
 		$a = new SteamID( '[U:1:819]' );
 		$this->assertEquals( 'fff', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:0]' );
+		$this->assertEquals( 'b', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:1]' );
+		$this->assertEquals( 'c', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:2]' );
+		$this->assertEquals( 'd', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:3]' );
+		$this->assertEquals( 'f', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:4]' );
+		$this->assertEquals( 'g', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:5]' );
+		$this->assertEquals( 'h', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:6]' );
+		$this->assertEquals( 'j', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:7]' );
+		$this->assertEquals( 'k', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:8]' );
+		$this->assertEquals( 'm', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:9]' );
+		$this->assertEquals( 'n', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:10]' );
+		$this->assertEquals( 'p', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:11]' );
+		$this->assertEquals( 'q', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:12]' );
+		$this->assertEquals( 'r', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:13]' );
+		$this->assertEquals( 't', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:14]' );
+		$this->assertEquals( 'v', $a->RenderSteamInvite() );
+		
+		$a = new SteamID( '[U:1:15]' );
+		$this->assertEquals( 'w', $a->RenderSteamInvite() );
+		
 	}
 	
 	/**
