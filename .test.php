@@ -116,6 +116,7 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID::DesktopInstance, $s->GetAccountInstance() );
 		$this->assertEquals( SteamID::UniverseInvalid, $s->GetAccountUniverse() );
 		$this->assertEquals( SteamID::TypeInvalid, $s->GetAccountType() );
+	}
 	
 	public function testSteam3CorrectParse( )
 	{
