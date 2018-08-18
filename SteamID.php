@@ -213,19 +213,7 @@ class SteamID
 		}
 		else if( self::IsNumeric( $Value ) )
 		{
-			// Check for max unsigned 32-bit number
-			if( gmp_cmp( $Value, '4294967295' ) > 0 )
-			{
-				$this->Data = gmp_init( $Value, 10 );
-			}
-			else
-			{
-				// If it's merely an 32bit integer, assume it's accountid (e.g. friend id in dota2)
-				$this->SetAccountUniverse( self::UniversePublic );
-				$this->SetAccountInstance( self::DesktopInstance );
-				$this->SetAccountType( self::TypeIndividual );
-				$this->SetAccountID( $Value );
-			}
+			$this->Data = gmp_init( $Value, 10 );
 		}
 		else
 		{

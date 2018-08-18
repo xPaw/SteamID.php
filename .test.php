@@ -91,33 +91,6 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( SteamID::UniversePublic, $s->GetAccountUniverse() );
 	}
 	
-	public function testAccountIdDefault( )
-	{
-		$s = new SteamID( 123 );
-		
-		$this->assertTrue( $s->IsValid() );
-		$this->assertEquals( 123, $s->GetAccountID() );
-		$this->assertEquals( SteamID::DesktopInstance, $s->GetAccountInstance() );
-		$this->assertEquals( SteamID::UniversePublic, $s->GetAccountUniverse() );
-		$this->assertEquals( SteamID::TypeIndividual, $s->GetAccountType() );
-		
-		$s = new SteamID( '4294967295' );
-		
-		$this->assertTrue( $s->IsValid() );
-		$this->assertEquals( 4294967295, $s->GetAccountID() );
-		$this->assertEquals( SteamID::DesktopInstance, $s->GetAccountInstance() );
-		$this->assertEquals( SteamID::UniversePublic, $s->GetAccountUniverse() );
-		$this->assertEquals( SteamID::TypeIndividual, $s->GetAccountType() );
-		
-		$s = new SteamID( '4294967296' );
-		
-		$this->assertFalse( $s->IsValid() );
-		$this->assertEquals( 0, $s->GetAccountID() );
-		$this->assertEquals( SteamID::DesktopInstance, $s->GetAccountInstance() );
-		$this->assertEquals( SteamID::UniverseInvalid, $s->GetAccountUniverse() );
-		$this->assertEquals( SteamID::TypeInvalid, $s->GetAccountType() );
-	}
-	
 	public function testSteam3CorrectParse( )
 	{
 		$s = new SteamID( '[U:1:123]' );
