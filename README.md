@@ -61,10 +61,10 @@ echo $s->ConvertToUInt64() . PHP_EOL;
 ### SteamID normalization
 
 If you run some website where users can enter their own SteamIDs, sometimes you
- might encounter SteamIDs which have wrong universe or instanceid set, which 
- will result in a completely different, yet valid, SteamID. To avoid this, you
-  can manipulate given SteamID and set universe to public and instance to 
-  desktop.
+might encounter SteamIDs which have wrong universe or instanceid set, which 
+will result in a completely different, yet valid, SteamID. To avoid this, you
+can manipulate given SteamID and set universe to public and instance to 
+desktop.
 
 ```php
 try
@@ -119,6 +119,11 @@ After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or
 			<td>Renders this instance into it's Steam3 representation.</td>
 		</tr>
 		<tr>
+			<td>RenderSteamInvite</td>
+			<td>-</td>
+			<td>Encodes accountid as HEX which can be used in `http://s.team/p/` URL.</td>
+		</tr>
+		<tr>
 			<td>ConvertToUInt64</td>
 			<td>-</td>
 			<td>Converts this SteamID into it's 64bit integer form.</td>
@@ -170,6 +175,33 @@ After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or
 		</tr>
 	</tbody>
 </table>
+
+## New Steam invite URLs
+
+Valve introduce a new way of sharing profile URLs (https://s.team/p/hjqp or https://steamcommunity.com/user/hjqp). The encoding is simply hex encoded account id and each letter being replaced with a custom alphabet. While HEX originally is `0-9a-f`, in the converted version numbers and letters `a` or `e` are not included, but they still work in the URL because Valve does a single pass replacement.
+
+This library natively supports parsing `s.team/p/` or `steamcommunity.com/user/` URLs in `SetFromURL` function.
+
+Here's the mapping of replacements:
+
+Hex | Letter
+--|--
+0 | b
+1 | c
+2 | d
+3 | f
+4 | g
+5 | h
+6 | j
+7 | k
+8 | m
+9 | n
+a | p
+b | q
+c | r
+d | t
+e | v
+f | w
 
 ## License
 
