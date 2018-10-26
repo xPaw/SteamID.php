@@ -1,4 +1,4 @@
-# SteamID.php [![Build Status](https://img.shields.io/travis/xPaw/SteamID.php.svg)](https://travis-ci.com/xPaw/SteamID.php) [![Test Coverage](https://api.codeclimate.com/v1/badges/0a9a150b0f0575b3c8a1/test_coverage)](https://codeclimate.com/github/xPaw/SteamID.php/test_coverage) [![Packagist](https://img.shields.io/packagist/dt/xpaw/steamid.svg)](https://packagist.org/packages/xpaw/steamid)
+# SteamID.php [![Build Status](https://img.shields.io/travis/com/xPaw/SteamID.php.svg)](https://travis-ci.com/xPaw/SteamID.php) [![Test Coverage](https://api.codeclimate.com/v1/badges/0a9a150b0f0575b3c8a1/test_coverage)](https://codeclimate.com/github/xPaw/SteamID.php/test_coverage) [![Packagist](https://img.shields.io/packagist/dt/xpaw/steamid.svg)](https://packagist.org/packages/xpaw/steamid)
 
 This 64bit structure is used for identifying various objects on the Steam 
 network. This library provides an easy way to work with SteamIDs and makes 
