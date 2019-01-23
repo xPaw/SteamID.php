@@ -129,7 +129,7 @@ class SteamID
 		}
 		
 		// SetFromString
-		if( preg_match( '/^STEAM_([0-4]):([0-1]):([0-9]{1,10})$/', $Value, $Matches ) === 1 )
+		if( preg_match( '/^STEAM_([0-4]):([0-1]):([0-9]{1,10})$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
 			
@@ -156,7 +156,7 @@ class SteamID
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', $Value, $Matches ) === 1 )
+		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
 			
@@ -209,7 +209,7 @@ class SteamID
 			
 			$this->SetAccountUniverse( (int)$Matches[ 2 ] );
 			$this->SetAccountInstance( $InstanceID );
-			$this->SetAccountID( (int)$AccountID );
+			$this->SetAccountID( $AccountID );
 		}
 		else if( self::IsNumeric( $Value ) )
 		{
@@ -541,7 +541,7 @@ class SteamID
 	/**
 	 * Sets the account id.
 	 *
-	 * @param int $Value The account id.
+	 * @param int|string $Value The account id.
 	 * 
 	 * @return SteamID Fluent interface
 	 */
@@ -608,7 +608,7 @@ class SteamID
 	/**
 	 * @param int $BitOffset
 	 * @param int|string $ValueMask
-	 * @param int $Value
+	 * @param int|string $Value
 	 * 
 	 * @return void
 	 */
@@ -623,7 +623,7 @@ class SteamID
 	/**
 	 * Shift the bits of $x by $n steps to the left
 	 * 
-	 * @param int|\GMP $x
+	 * @param int|string|\GMP $x
 	 * @param int $n
 	 *
 	 * @return \GMP
@@ -636,8 +636,8 @@ class SteamID
 	/**
 	 * Shift the bits of $x by $n steps to the right
 	 * 
-	 * @param int|\GMP $x
-	 * @param int$n
+	 * @param int|string|\GMP $x
+	 * @param int $n
 	 *
 	 * @return \GMP
 	 */
@@ -648,6 +648,10 @@ class SteamID
 	
 	/**
 	 * This is way more restrictive than php's is_numeric()
+	 *
+	 * @param int|string $n
+	 *
+	 * @return bool
 	 */
 	private static function IsNumeric( $n )
 	{
