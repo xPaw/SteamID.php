@@ -13,4 +13,4 @@ jobs:
     - name: Install dependencies
       run: composer install --no-interaction --no-progress
     - name: Run tests
-      run: php${{ matrix.php }} vendor/bin/phpunit --configuration .phpunit.xml --verbose
+      run: php${{ matrix.php }} vendor/bin/phpunit --configuration .phpunit.xml --verbose --fail-on-warning

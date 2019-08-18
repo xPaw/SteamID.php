@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-class SteamIDFacts extends PHPUnit_Framework_TestCase
+class SteamIDFacts extends PHPUnit\Framework\TestCase
 {
 	public function testEmptyConstructorInvalid( )
 	{
@@ -193,32 +193,31 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	
 	/**
 	 * @dataProvider invalidIdProvider
-	 *
-	 * @expectedException InvalidArgumentException
-	 * @expectedException Provided SteamID is invalid
 	 */
 	public function testConstructorHandlesInvalid( $SteamID )
 	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Provided SteamID is invalid.' );
+
 		new SteamID( $SteamID );
 	}
 	
 	/**
 	 * @dataProvider invalidAccountIdsOverflowProvider
-	 * 
-	 * @expectedException InvalidArgumentException
-	 * @expectedExceptionMessage 32-bit
 	 */
 	public function testInvalidConstructorOverflow( $SteamID )
 	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
+
 		new SteamID( $SteamID );
 	}
-	
-	/**
-	 * @expectedException InvalidArgumentException
-	 * @expectedExceptionMessage not numeric
-	 */
+
 	public function testInvalidSetFromUInt64( )
 	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Provided SteamID is not numeric.' );
+
 		$s = new SteamID( );
 		$s->SetFromUInt64( '111failure111' );
 	}
@@ -241,11 +240,10 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 		$this->assertEquals( '[U:1:12229257]', $s->RenderSteam3() );
 	}
 	
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function testInvalidSteamInviteType( )
 	{
+		$this->expectException( InvalidArgumentException::class );
+
 		$a = new SteamID( '[A:2:165:1234]' );
 		$a->RenderSteamInvite();
 	}
@@ -310,11 +308,11 @@ class SteamIDFacts extends PHPUnit_Framework_TestCase
 	
 	/**
 	 * @dataProvider invalidVanityUrlProvider
-	 *
-	 * @expectedException InvalidArgumentException
 	 */
 	public function testInvalidSetFromUrl( $URL )
 	{
+		$this->expectException( InvalidArgumentException::class );
+
 		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 	}
 	
