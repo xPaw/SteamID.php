@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/SteamID.php';
+declare(strict_types=1);
 
 class SteamIDFacts extends PHPUnit_Framework_TestCase
 {
