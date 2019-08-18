@@ -228,7 +228,7 @@ class SteamID
 	 *
 	 * @return string A string Steam2 "STEAM_" representation of this SteamID.
 	 */
-	public function RenderSteam2()
+	public function RenderSteam2() : string
 	{
 		switch( $this->GetAccountType() )
 		{
@@ -253,7 +253,7 @@ class SteamID
 	 *
 	 * @return string A string Steam3 representation of this SteamID.
 	 */
-	public function RenderSteam3()
+	public function RenderSteam3() : string
 	{
 		$AccountInstance = $this->GetAccountInstance();
 		$AccountType = $this->GetAccountType();
@@ -311,7 +311,7 @@ class SteamID
 	 *
 	 * @return string A Steam invite code which can be used in a URL.
 	 */
-	public function RenderSteamInvite()
+	public function RenderSteamInvite() : string
 	{
 		switch( $this->GetAccountType() )
 		{
@@ -342,7 +342,7 @@ class SteamID
 	 *
 	 * @return bool true if this instance is valid; otherwise, false.
 	 */
-	public function IsValid()
+	public function IsValid() : bool
 	{
 		$AccountType = $this->GetAccountType();
 		
@@ -411,7 +411,7 @@ class SteamID
 	 * 
 	 * @throws InvalidArgumentException
 	 */
-	public static function SetFromURL( $Value, callable $VanityCallback )
+	public static function SetFromURL( string $Value, callable $VanityCallback ) : SteamID
 	{
 		if( preg_match( '/^https?:\/\/steamcommunity\.com\/profiles\/(.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
@@ -475,7 +475,7 @@ class SteamID
 	 * 
 	 * @throws InvalidArgumentException
 	 */
-	public function SetFromUInt64( $Value )
+	public function SetFromUInt64( $Value ) : SteamID
 	{
 		if( self::IsNumeric( $Value ) )
 		{
@@ -495,7 +495,7 @@ class SteamID
 	 *
 	 * @return string A 64bit integer representing this SteamID.
 	 */
-	public function ConvertToUInt64()
+	public function ConvertToUInt64() : string
 	{
 		return gmp_strval( $this->Data );
 	}
@@ -505,7 +505,7 @@ class SteamID
 	 *
 	 * @return int The account id.
 	 */
-	public function GetAccountID()
+	public function GetAccountID() : int
 	{
 		return gmp_intval( $this->Get( 0, '4294967295' ) ); // 4294967295 = 0xFFFFFFFF
 	}
@@ -515,7 +515,7 @@ class SteamID
 	 *
 	 * @return int The account instance.
 	 */
-	public function GetAccountInstance()
+	public function GetAccountInstance() : int
 	{
 		return gmp_intval( $this->Get( 32, '1048575' ) ); // 1048575 = 0xFFFFF
 	}
@@ -525,7 +525,7 @@ class SteamID
 	 *
 	 * @return int The account type.
 	 */
-	public function GetAccountType()
+	public function GetAccountType() : int
 	{
 		return gmp_intval( $this->Get( 52, '15' ) ); // 15 = 0xF
 	}
@@ -535,7 +535,7 @@ class SteamID
 	 *
 	 * @return int The account universe.
 	 */
-	public function GetAccountUniverse()
+	public function GetAccountUniverse() : int
 	{
 		return gmp_intval( $this->Get( 56, '255' ) ); // 255 = 0xFF
 	}
@@ -547,7 +547,7 @@ class SteamID
 	 * 
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountID( $Value )
+	public function SetAccountID( $Value ) : SteamID
 	{
 		$this->Set( 0, '4294967295', $Value ); // 4294967295 = 0xFFFFFFFF
 		
@@ -561,7 +561,7 @@ class SteamID
 	 * 
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountInstance( $Value )
+	public function SetAccountInstance( int $Value ) : SteamID
 	{
 		$this->Set( 32, '1048575', $Value ); // 1048575 = 0xFFFFF
 		
@@ -575,7 +575,7 @@ class SteamID
 	 * 
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountType( $Value )
+	public function SetAccountType( int $Value ) : SteamID
 	{
 		$this->Set( 52, '15', $Value ); // 15 = 0xF
 		
@@ -589,7 +589,7 @@ class SteamID
 	 * 
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountUniverse( $Value )
+	public function SetAccountUniverse( $Value ) : SteamID
 	{
 		$this->Set( 56, '255', $Value ); // 255 = 0xFF
 		
@@ -602,7 +602,7 @@ class SteamID
 	 * 
 	 * @return \GMP
 	 */
-	private function Get( $BitOffset, $ValueMask )
+	private function Get( int $BitOffset, $ValueMask ) : \GMP
 	{
 		return gmp_and( self::ShiftRight( $this->Data, $BitOffset ), $ValueMask );
 	}
@@ -614,7 +614,7 @@ class SteamID
 	 * 
 	 * @return void
 	 */
-	private function Set( $BitOffset, $ValueMask, $Value )
+	private function Set( int $BitOffset, $ValueMask, $Value ) : void
 	{
 		$this->Data = gmp_or(
 			gmp_and( $this->Data, gmp_com( self::ShiftLeft( $ValueMask, $BitOffset ) ) ),
@@ -630,7 +630,7 @@ class SteamID
 	 *
 	 * @return \GMP
 	 */
-	private static function ShiftLeft( $x, $n )
+	private static function ShiftLeft( $x, int $n ) : \GMP
 	{
 		return gmp_mul( $x, gmp_pow( 2, $n ) );
 	}
@@ -643,7 +643,7 @@ class SteamID
 	 *
 	 * @return \GMP
 	 */
-	private static function ShiftRight( $x, $n )
+	private static function ShiftRight( $x, int $n ) : \GMP
 	{
 		return gmp_div_q( $x, gmp_pow( 2, $n ) );
 	}
@@ -655,7 +655,7 @@ class SteamID
 	 *
 	 * @return bool
 	 */
-	private static function IsNumeric( $n )
+	private static function IsNumeric( $n ) : bool
 	{
 		return preg_match( '/^[1-9][0-9]{0,19}$/', (string)$n ) === 1;
 	}
