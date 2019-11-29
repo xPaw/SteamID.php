@@ -455,9 +455,8 @@ class SteamID
 		else if( preg_match( '/^https?:\/\/(steamcommunity\.com\/user|s\.team\/p)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
 			$Value = strtolower( $Matches[ 2 ] );
+			$Value = preg_replace( '/[^' . implode( '', self::$SteamInviteDictionary ) . ']/', '', $Value );
 			$Value = strtr( $Value, array_flip( self::$SteamInviteDictionary ) );
-			
-			// hexdec() will ignore any non-hexadecimal characters it encounters.
 			$Value = hexdec( $Value );
 			
 			$Value = '[U:1:' . $Value . ']';
