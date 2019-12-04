@@ -405,7 +405,7 @@ class SteamID
 	 * Example implementation is provided in `VanityURLs.php` file.
 	 *
 	 * @param string $Value Input URL
-	 * @param string $VanityCallback Callback which is called when a vanity lookup is required
+	 * @param callable $VanityCallback Callback which is called when a vanity lookup is required
 	 * 
 	 * @return SteamID Fluent interface
 	 * 
