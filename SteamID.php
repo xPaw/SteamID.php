@@ -69,7 +69,6 @@ class SteamID
 	const UniverseBeta     = 2;
 	const UniverseInternal = 3;
 	const UniverseDev      = 4;
-	const UniverseMax      = 5; // Max universes, not an actual universe
 	
 	/**
 	 * Steam account types.
@@ -346,14 +345,14 @@ class SteamID
 	{
 		$AccountType = $this->GetAccountType();
 		
-		if( $AccountType <= self::TypeInvalid || $AccountType >= 11 ) // EAccountType.Max
+		if( $AccountType <= self::TypeInvalid || $AccountType > self::TypeAnonUser )
 		{
 			return false;
 		}
 		
 		$AccountUniverse = $this->GetAccountUniverse();
 		
-		if( $AccountUniverse <= self::UniverseInvalid || $AccountUniverse >= self::UniverseMax )
+		if( $AccountUniverse <= self::UniverseInvalid || $AccountUniverse > self::UniverseDev )
 		{
 			return false;
 		}
