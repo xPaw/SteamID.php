@@ -1,4 +1,6 @@
 <?php
+require __DIR__ . '/SteamID.php';
+
 // Simpler solution which doesn't perform any API requests and simply only works on /profiles/ urls
 $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/profiles/[U:1:2]', function()
 {
@@ -8,7 +10,7 @@ $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/profiles/[U:1:2]', fu
 
 $WebAPIKey = 'YOUR WEBAPI KEY HERE';
 
-$SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', function( $URL, $Type ) use ( $WebAPIKey )
+$SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', function( string $URL, int $Type ) use ( $WebAPIKey )
 {
 	$Parameters =
 	[
@@ -33,7 +35,7 @@ $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', functi
 	
 	curl_close( $c );
 	
-	$Response = json_decode( $Response, true );
+	$Response = json_decode( (string)$Response, true );
 	
 	if( isset( $Response[ 'response' ][ 'success' ] ) )
 	{
