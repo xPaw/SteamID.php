@@ -266,11 +266,11 @@ class SteamID
 		{
 			case self::TypeChat:
 			{
-				if( $AccountInstance & SteamID :: InstanceFlagClan )
+				if( $AccountInstance & SteamID::InstanceFlagClan )
 				{
 					$AccountTypeChar = 'c';
 				}
-				else if( $AccountInstance & SteamID :: InstanceFlagLobby )
+				else if( $AccountInstance & SteamID::InstanceFlagLobby )
 				{
 					$AccountTypeChar = 'L';
 				}
