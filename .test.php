@@ -192,6 +192,34 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 	}
 
 	/**
+	 * @dataProvider steamId64BitProvider
+	 */
+	public function testConvertToUInt64( string $SteamID ) : void
+	{
+		$s = new SteamID( $SteamID );
+		$this->assertEquals( $SteamID, $s->ConvertToUInt64() );
+	}
+
+	/**
+	 * @dataProvider steamId64BitProvider
+	 */
+	public function testSetFromUInt64( string $SteamID ) : void
+	{
+		$s = new SteamID();
+		$s->SetFromUInt64( $SteamID );
+		$this->assertEquals( $SteamID, $s->ConvertToUInt64() );
+	}
+
+	/**
+	 * @dataProvider steamId64BitProvider
+	 */
+	public function testToStringCast( string $SteamID ) : void
+	{
+		$s = new SteamID( $SteamID );
+		$this->assertEquals( $SteamID, (string)$s );
+	}
+
+	/**
 	 * @dataProvider invalidIdProvider
 	 * @param int|string|null $SteamID
 	 */
@@ -363,6 +391,21 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ '[T:1:123]' ],
 			[ '[c:1:123]' ],
 			[ '[L:1:123]' ],
+		];
+	}
+
+	public function steamId64BitProvider( ) : array
+	{
+		return
+		[
+			[ '76561197960265851' ],
+			[ '76561202255233147' ],
+			[ '85568392920040050' ],
+			[ '162134886574981285' ],
+			[ '108086391056892027' ],
+			[ '110338190870577275' ],
+			[ '109212290963734651' ],
+			[ '1234' ],
 		];
 	}
 

@@ -782,4 +782,9 @@ class SteamID
 	{
 		return preg_match( '/^[1-9][0-9]{0,19}$/', (string)$n ) === 1;
 	}
+
+	public function __toString() : string
+	{
+		return $this->ConvertToUInt64();
+	}
 }
