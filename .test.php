@@ -317,6 +317,41 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 	}
 
+	public function testCsgoFriendCodes() : void
+	{
+		$a = new SteamID( '[U:1:12229257]' );
+		$this->assertEquals( 'ALQF4-BYCA', $a->RenderCsgoFriendCode() );
+		
+		$a = new SteamID( '76561198084043632' );
+		$this->assertEquals( 'SFW3A-MPAQ', $a->RenderCsgoFriendCode() );
+
+		$a = new SteamID( '[U:1:0]' );
+		$this->assertEquals( 'AEAAA-AABC', $a->RenderCsgoFriendCode() );
+
+		$a = new SteamID( '[U:1:1]' );
+		$this->assertEquals( 'AJJJS-ABAA', $a->RenderCsgoFriendCode() );
+
+		$a = new SteamID( '[U:1:4294967295]' );
+		$this->assertEquals( 'S9999-986R', $a->RenderCsgoFriendCode() );
+
+		$a = new SteamID( '[I:4:12229257:1234567]' );
+		$this->assertEquals( 'ALQF4-BYCA', $a->RenderCsgoFriendCode() );
+
+		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'ALQF4-BYCA' );
+		$this->assertEquals( '[U:1:12229257]', $a->RenderSteam3() );
+
+		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'SFW3A-MPAQ' );
+		$this->assertEquals( '[U:1:123777904]', $a->RenderSteam3() );
+
+		// Generated id without md5 niblets ($HashNibble=0), still parses because parser ignores it
+		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'ALGFL-BYAA' );
+		$this->assertEquals( '[U:1:12229257]', $a->RenderSteam3() );
+
+		// Generated id without md5 niblets ($HashNibble=1), still parses because parser ignores it
+		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'AQQP4-BZDC' );
+		$this->assertEquals( '[U:1:12229257]', $a->RenderSteam3() );
+	}
+
 	public function steam3StringProvider( ) : array
 	{
 		return

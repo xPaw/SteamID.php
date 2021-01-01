@@ -124,6 +124,11 @@ After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or
 			<td>Encodes accountid as HEX which can be used in `http://s.team/p/` URL.</td>
 		</tr>
 		<tr>
+			<td>RenderCsgoFriendCode</td>
+			<td>-</td>
+			<td>Encodes accountid as CS:GO friend code.</td>
+		</tr>
+		<tr>
 			<td>ConvertToUInt64</td>
 			<td>-</td>
 			<td>Converts this SteamID into it's 64bit integer form.</td>
@@ -132,6 +137,11 @@ After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or
 			<td>SetFromUInt64</td>
 			<td>string or int (e.g 765...)</td>
 			<td>Sets the various components of this SteamID from a 64bit integer form.</td>
+		</tr>
+		<tr>
+			<td>SetFromCsgoFriendCode</td>
+			<td>string</td>
+			<td>Sets the accountid of this SteamID from a CS:GO friend code. Resets other components to default values.</td>
 		</tr>
 		<tr>
 			<td>GetAccountID</td>

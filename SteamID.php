@@ -335,7 +335,77 @@ class SteamID
 			}
 		}
 	}
-	
+
+	/**
+	 * Renders this instance into friend code used by CS:GO.
+	 * Looks like SUCVS-FADA.
+	 *
+	 * Based on <https://github.com/emily33901/go-csfriendcode>
+	 * and looking at CSGO's client.dll.
+	 *
+	 * @return string A friend code which can be used in CS:GO.
+	 */
+	public function RenderCsgoFriendCode() : string
+	{
+		$AccountType = $this->GetAccountType();
+
+		if( $AccountType !== self::TypeInvalid && $AccountType !== self::TypeIndividual )
+		{
+			throw new InvalidArgumentException( 'This can only be used on Individual SteamID.' );
+		}
+
+		// Shift by string "CSGO" (0x4353474)
+		$Hash = gmp_or( $this->GetAccountID(), '0x4353474F00000000' );
+
+		// Convert it to little-endian
+		$Hash = gmp_export( $Hash, 8, GMP_LITTLE_ENDIAN );
+
+		// Hash the exported number
+		$Hash = md5( $Hash, true );
+
+		// Take the first 4 bytes and convert it back to a number
+		// not using gmp as it is 32-bit
+		$Hash = unpack( 'i', substr( $Hash, 0, 4 ) )[ 1 ];
+
+		$Result = gmp_init( 0 );
+
+		for( $i = 0; $i < 8; $i++ )
+		{
+			$IdNibble = $this->Get( 4 * $i, '0xF' );
+			$HashNibble = gmp_and( self::ShiftRight( $Hash, $i ), 1 );
+
+			$a = gmp_or( self::ShiftLeft( $Result, 4 ), $IdNibble );
+
+			// Valve certainly knows how to turn accountid into
+			// a complicated algorhitm for no good reason
+			$Result = gmp_or( self::ShiftLeft( self::ShiftRight( $Result, 28 ), 32 ), $a );
+			$Result = gmp_or(
+				self::ShiftLeft( self::ShiftRight( $Result, 31 ), 32 ),
+				gmp_or( self::ShiftLeft( $a, 1 ), $HashNibble )
+			);
+		}
+
+		// Is there a better way of doing this?
+		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
+		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+		$FriendCode = '';
+		$i = 0;
+
+		for( $i = 0; $i < 13; $i++ )
+		{
+			if( $i === 4 || $i === 9 )
+			{
+				$FriendCode .= '-';
+			}
+
+			$FriendCode .= $Base32[ (int)gmp_and( $Result, 31 ) ];
+			$Result = self::ShiftRight( $Result, 5 );
+		}
+
+		// Strip the AAAA- prefix
+		return substr( $FriendCode, 5 );
+	}
+
 	/**
 	 * Gets a value indicating whether this instance is valid.
 	 *
@@ -498,6 +568,61 @@ class SteamID
 		return gmp_strval( $this->Data );
 	}
 	
+	/**
+	 * Sets the account from the given CS:GO friend code (looks like SUCVS-FBAC).
+	 *
+	 * @param string $Value The CS:GO friend code.
+	 *
+	 * @return SteamID Fluent interface
+	 *
+	 * @throws InvalidArgumentException
+	 */
+	public function SetFromCsgoFriendCode( $Value ) : SteamID
+	{
+		if( !is_string( $Value ) || strlen( $Value ) !== 10 || $Value[ 5 ] !== '-' )
+		{
+			throw new InvalidArgumentException( 'Given input is not a valid CS:GO friend code.' );
+		}
+
+		$Value = 'AAAA-' . $Value;
+		$Value = str_replace( '-', '', $Value );
+
+		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+		$Result = gmp_init( 0 );
+
+		for( $i = 0; $i < 13; $i++ )
+		{
+			$Character = strpos( $Base32, $Value[ $i ] );
+
+			if( $Character === false )
+			{
+				throw new InvalidArgumentException( 'Given input is malformed.' );
+			}
+
+			$Result = gmp_or( $Result, self::ShiftLeft( $Character, 5 * $i ) );
+		}
+
+		// Is there a way to avoid this?
+		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
+		$AccountId = 0;
+
+		for( $i = 0; $i < 8; $i++ )
+		{
+			$Result = self::ShiftRight( $Result, 1 );
+			$IdNibble = gmp_and( $Result, '0xF' );
+			$Result = self::ShiftRight( $Result, 4 );
+
+			$AccountId = gmp_or( self::ShiftLeft( $AccountId, 4 ), $IdNibble );
+		}
+
+		$this->SetAccountID( $AccountId );
+		$this->SetAccountType( self::TypeIndividual );
+		$this->SetAccountUniverse( self::UniversePublic );
+		$this->SetAccountInstance( 1 );
+
+		return $this;
+	}
+
 	/**
 	 * Gets the account id.
 	 *
