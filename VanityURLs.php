@@ -19,9 +19,9 @@ $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', functi
 		'vanityurl' => $URL,
 		'url_type' => $Type
 	];
-	
+
 	$c = curl_init( );
-	
+
 	curl_setopt_array( $c, [
 		CURLOPT_USERAGENT      => 'Steam Vanity URL Lookup',
 		CURLOPT_ENCODING       => 'gzip',
@@ -30,13 +30,13 @@ $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', functi
 		CURLOPT_CONNECTTIMEOUT => 5,
 		CURLOPT_TIMEOUT        => 5
 	] );
-	
+
 	$Response = curl_exec( $c );
-	
+
 	curl_close( $c );
-	
+
 	$Response = json_decode( (string)$Response, true );
-	
+
 	if( isset( $Response[ 'response' ][ 'success' ] ) )
 	{
 		switch( (int)$Response[ 'response' ][ 'success' ] )
@@ -45,6 +45,6 @@ $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', functi
 			case 42: return null;
 		}
 	}
-	
+
 	throw new Exception( 'Failed to perform API request' );
 } );

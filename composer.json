@@ -21,7 +21,7 @@
 	},
 	"autoload":
 	{
-		"files": 
+		"files":
 		[
 			"SteamID.php"
 		]

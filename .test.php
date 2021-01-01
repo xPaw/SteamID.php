@@ -321,7 +321,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 	{
 		$a = new SteamID( '[U:1:12229257]' );
 		$this->assertEquals( 'ALQF4-BYCA', $a->RenderCsgoFriendCode() );
-		
+
 		$a = new SteamID( '76561198084043632' );
 		$this->assertEquals( 'SFW3A-MPAQ', $a->RenderCsgoFriendCode() );
 

@@ -37,7 +37,7 @@ class SteamID
 		self::TypeIndividual     => 'U',
 		self::TypeAnonUser       => 'a',
 	];
-	
+
 	/**
 	 * @var array List of replacement hex characters used in /user/ URLs
 	 */
@@ -60,7 +60,7 @@ class SteamID
 		'e' => 'v',
 		'f' => 'w',
 	];
-	
+
 	/**
 	 * Steam universes. Each universe is a self-contained Steam instance.
 	 */
@@ -69,7 +69,7 @@ class SteamID
 	const UniverseBeta     = 2;
 	const UniverseInternal = 3;
 	const UniverseDev      = 4;
-	
+
 	/**
 	 * Steam account types.
 	 */
@@ -84,7 +84,7 @@ class SteamID
 	const TypeChat           = 8;
 	const TypeP2PSuperSeeder = 9;
 	const TypeAnonUser       = 10;
-	
+
 	/**
 	 * Steam allows 3 simultaneous user account instances right now.
 	 */
@@ -92,7 +92,7 @@ class SteamID
 	const DesktopInstance = 1;
 	const ConsoleInstance = 2;
 	const WebInstance     = 4;
-	
+
 	/**
 	 * Special flags for Chat accounts - they go in the top 8 bits
 	 * of the steam ID's "instance", leaving 12 for the actual instances
@@ -100,19 +100,19 @@ class SteamID
 	const InstanceFlagClan     = 524288; // ( k_unSteamAccountInstanceMask + 1 ) >> 1
 	const InstanceFlagLobby    = 262144; // ( k_unSteamAccountInstanceMask + 1 ) >> 2
 	const InstanceFlagMMSLobby = 131072; // ( k_unSteamAccountInstanceMask + 1 ) >> 3
-	
+
 	/**
 	 * Vanity URL types used by ResolveVanityURL method.
 	 */
 	const VanityIndividual = 1;
 	const VanityGroup      = 2;
 	const VanityGameGroup  = 3;
-	
+
 	/**
 	 * @var \GMP
 	 */
 	private $Data;
-	
+
 	/**
 	 * Initializes a new instance of the SteamID class.
 	 *
@@ -123,34 +123,34 @@ class SteamID
 	public function __construct( $Value = null )
 	{
 		$this->Data = gmp_init( 0 );
-		
+
 		if( $Value === null )
 		{
 			return;
 		}
-		
+
 		// SetFromString
 		if( preg_match( '/^STEAM_([0-4]):([0-1]):([0-9]{1,10})$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
-			
+
 			// Check for max unsigned 32-bit number
 			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
-			
+
 			$Universe = (int)$Matches[ 1 ];
-			
+
 			// Games before orange box used to incorrectly display universe as 0, we support that
 			if( $Universe === self::UniverseInvalid )
 			{
 				$Universe = self::UniversePublic;
 			}
-			
+
 			$AuthServer = (int)$Matches[ 2 ];
 			$AccountID = ( (int)$AccountID << 1 ) | $AuthServer;
-			
+
 			$this->SetAccountUniverse( $Universe );
 			$this->SetAccountInstance( self::DesktopInstance );
 			$this->SetAccountType( self::TypeIndividual );
@@ -160,20 +160,20 @@ class SteamID
 		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
-			
+
 			// Check for max unsigned 32-bit number
 			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
-			
+
 			$Type = $Matches[ 1 ];
-			
+
 			if( $Type === 'i' )
 			{
 				$Type = 'I';
 			}
-			
+
 			if( $Type === 'T' || $Type === 'g' )
 			{
 				$InstanceID = self::AllInstances;
@@ -190,24 +190,24 @@ class SteamID
 			{
 				$InstanceID = self::AllInstances;
 			}
-			
+
 			if( $Type === 'c' )
 			{
 				$InstanceID = self::InstanceFlagClan;
-				
+
 				$this->SetAccountType( self::TypeChat );
 			}
 			else if( $Type === 'L' )
 			{
 				$InstanceID = self::InstanceFlagLobby;
-				
+
 				$this->SetAccountType( self::TypeChat );
 			}
 			else
 			{
 				$this->SetAccountType( array_search( $Type, self::$AccountTypeChars, true ) );
 			}
-			
+
 			$this->SetAccountUniverse( (int)$Matches[ 2 ] );
 			$this->SetAccountInstance( $InstanceID );
 			$this->SetAccountID( $AccountID );
@@ -221,7 +221,7 @@ class SteamID
 			throw new InvalidArgumentException( 'Provided SteamID is invalid.' );
 		}
 	}
-	
+
 	/**
 	 * Renders this instance into it's Steam2 "STEAM_" representation.
 	 *
@@ -236,8 +236,8 @@ class SteamID
 			{
 				$Universe = $this->GetAccountUniverse();
 				$AccountID = $this->GetAccountID();
-				
-				return 'STEAM_' . $Universe . ':' . ( $AccountID & 1 ) . ':' . 
+
+				return 'STEAM_' . $Universe . ':' . ( $AccountID & 1 ) . ':' .
 					( $AccountID >> 1 );
 			}
 			default:
@@ -246,7 +246,7 @@ class SteamID
 			}
 		}
 	}
-	
+
 	/**
 	 * Renders this instance into its Steam3 representation.
 	 *
@@ -256,12 +256,12 @@ class SteamID
 	{
 		$AccountInstance = $this->GetAccountInstance();
 		$AccountType = $this->GetAccountType();
-		$AccountTypeChar = isset( self::$AccountTypeChars[ $AccountType ] ) ? 
-			self::$AccountTypeChars[ $AccountType ] : 
+		$AccountTypeChar = isset( self::$AccountTypeChars[ $AccountType ] ) ?
+			self::$AccountTypeChars[ $AccountType ] :
 			'i';
-		
+
 		$RenderInstance = false;
-		
+
 		switch( $AccountType )
 		{
 			case self::TypeChat:
@@ -274,35 +274,35 @@ class SteamID
 				{
 					$AccountTypeChar = 'L';
 				}
-				
+
 				break;
 			}
 			case self::TypeAnonGameServer:
 			case self::TypeMultiseat:
 			{
 				$RenderInstance = true;
-				
+
 				break;
 			}
 			case self::TypeIndividual:
 			{
 				$RenderInstance = $AccountInstance != self::DesktopInstance;
-				
+
 				break;
 			}
 		}
-		
-		$Return = '[' . $AccountTypeChar . ':' . $this->GetAccountUniverse() . 
+
+		$Return = '[' . $AccountTypeChar . ':' . $this->GetAccountUniverse() .
 			':' . $this->GetAccountID();
-		
+
 		if( $RenderInstance )
 		{
 			$Return .= ':' . $AccountInstance;
 		}
-		
+
 		return $Return . ']';
 	}
-	
+
 	/**
 	 * Renders this instance into Steam's new invite code. Which can be formatted as:
 	 * http://s.team/p/%s
@@ -320,13 +320,13 @@ class SteamID
 				$Code = dechex( $this->GetAccountID() );
 				$Code = strtr( $Code, self::$SteamInviteDictionary );
 				$Length = strlen( $Code );
-				
+
 				// TODO: We don't know when Valve starts inserting the dash
 				if( $Length > 3 )
 				{
 					$Code = substr_replace( $Code, '-', (int)( $Length / 2 ), 0 );
 				}
-				
+
 				return $Code;
 			}
 			default:
@@ -414,22 +414,22 @@ class SteamID
 	public function IsValid() : bool
 	{
 		$AccountType = $this->GetAccountType();
-		
+
 		if( $AccountType <= self::TypeInvalid || $AccountType > self::TypeAnonUser )
 		{
 			return false;
 		}
-		
+
 		$AccountUniverse = $this->GetAccountUniverse();
-		
+
 		if( $AccountUniverse <= self::UniverseInvalid || $AccountUniverse > self::UniverseDev )
 		{
 			return false;
 		}
-		
+
 		$AccountID = $this->GetAccountID();
 		$AccountInstance = $this->GetAccountInstance();
-		
+
 		if( $AccountType === self::TypeIndividual )
 		{
 			if( $AccountID == 0 || $AccountInstance > self::WebInstance )
@@ -437,7 +437,7 @@ class SteamID
 				return false;
 			}
 		}
-		
+
 		if( $AccountType === self::TypeClan )
 		{
 			if( $AccountID == 0 || $AccountInstance != 0 )
@@ -445,7 +445,7 @@ class SteamID
 				return false;
 			}
 		}
-		
+
 		if( $AccountType === self::TypeGameServer )
 		{
 			if( $AccountID == 0 )
@@ -453,10 +453,10 @@ class SteamID
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Returns a SteamID instance constructed from a steamcommunity.com
 	 * URL form, or simply from a vanity url.
@@ -466,7 +466,7 @@ class SteamID
 	 *
 	 * Callback function must return resolved SteamID as a string,
 	 * or null if API returns success=42 (meaning no match).
-	 * 
+	 *
 	 * It's up to you to throw any exceptions if you wish to do so.
 	 *
 	 * This function can act as a pass-through for rendered Steam2/Steam3 ids.
@@ -475,9 +475,9 @@ class SteamID
 	 *
 	 * @param string $Value Input URL
 	 * @param callable $VanityCallback Callback which is called when a vanity lookup is required
-	 * 
+	 *
 	 * @return SteamID Fluent interface
-	 * 
+	 *
 	 * @throws InvalidArgumentException
 	 */
 	public static function SetFromURL( string $Value, callable $VanityCallback ) : SteamID
@@ -490,32 +490,32 @@ class SteamID
 		||       preg_match( '/^()([\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
 		{
 			$Length = strlen( $Matches[ 2 ] );
-			
+
 			if( $Length < 2 || $Length > 32 )
 			{
 				throw new InvalidArgumentException( 'Provided vanity url has bad length.' );
 			}
-			
+
 			// Steam doesn't allow vanity urls to be valid steamids
 			if( self::IsNumeric( $Matches[ 2 ] ) )
 			{
 				$SteamID = new SteamID( $Matches[ 2 ] );
-				
+
 				if( $SteamID->IsValid() )
 				{
 					return $SteamID;
 				}
 			}
-			
+
 			switch( $Matches[ 1 ] )
 			{
 				case 'groups': $VanityType = self::VanityGroup; break;
 				case 'games' : $VanityType = self::VanityGameGroup; break;
 				default      : $VanityType = self::VanityIndividual;
 			}
-			
+
 			$Value = call_user_func( $VanityCallback, $Matches[ 2 ], $VanityType );
-			
+
 			if( $Value === null )
 			{
 				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.' );
@@ -527,20 +527,20 @@ class SteamID
 			$Value = preg_replace( '/[^' . implode( '', self::$SteamInviteDictionary ) . ']/', '', $Value );
 			$Value = strtr( $Value, array_flip( self::$SteamInviteDictionary ) );
 			$Value = hexdec( $Value );
-			
+
 			$Value = '[U:1:' . $Value . ']';
 		}
-		
+
 		return new SteamID( $Value );
 	}
-	
+
 	/**
 	 * Sets the various components of this SteamID from a 64bit integer form.
 	 *
 	 * @param int|string $Value The 64bit integer to assign this SteamID from.
-	 * 
+	 *
 	 * @return SteamID Fluent interface
-	 * 
+	 *
 	 * @throws InvalidArgumentException
 	 */
 	public function SetFromUInt64( $Value ) : SteamID
@@ -553,12 +553,12 @@ class SteamID
 		{
 			throw new InvalidArgumentException( 'Provided SteamID is not numeric.' );
 		}
-		
+
 		return $this;
 	}
-	
+
 	/**
-	 * Converts this SteamID into it's 64bit integer form. This function returns 
+	 * Converts this SteamID into it's 64bit integer form. This function returns
 	 * as a string to work on 32-bit PHP systems.
 	 *
 	 * @return string A 64bit integer representing this SteamID.
@@ -567,7 +567,7 @@ class SteamID
 	{
 		return gmp_strval( $this->Data );
 	}
-	
+
 	/**
 	 * Sets the account from the given CS:GO friend code (looks like SUCVS-FBAC).
 	 *
@@ -632,7 +632,7 @@ class SteamID
 	{
 		return gmp_intval( $this->Get( 0, '4294967295' ) ); // 4294967295 = 0xFFFFFFFF
 	}
-	
+
 	/**
 	 * Gets the account instance.
 	 *
@@ -642,7 +642,7 @@ class SteamID
 	{
 		return gmp_intval( $this->Get( 32, '1048575' ) ); // 1048575 = 0xFFFFF
 	}
-	
+
 	/**
 	 * Gets the account type.
 	 *
@@ -652,7 +652,7 @@ class SteamID
 	{
 		return gmp_intval( $this->Get( 52, '15' ) ); // 15 = 0xF
 	}
-	
+
 	/**
 	 * Gets the account universe.
 	 *
@@ -662,79 +662,79 @@ class SteamID
 	{
 		return gmp_intval( $this->Get( 56, '255' ) ); // 255 = 0xFF
 	}
-	
+
 	/**
 	 * Sets the account id.
 	 *
 	 * @param int|string $Value The account id.
-	 * 
+	 *
 	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountID( $Value ) : SteamID
 	{
 		$this->Set( 0, '4294967295', $Value ); // 4294967295 = 0xFFFFFFFF
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Sets the account instance.
 	 *
 	 * @param int $Value The account instance.
-	 * 
+	 *
 	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountInstance( int $Value ) : SteamID
 	{
 		$this->Set( 32, '1048575', $Value ); // 1048575 = 0xFFFFF
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Sets the account type.
 	 *
 	 * @param int $Value The account type.
-	 * 
+	 *
 	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountType( int $Value ) : SteamID
 	{
 		$this->Set( 52, '15', $Value ); // 15 = 0xF
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Sets the account universe.
 	 *
 	 * @param int $Value The account universe.
-	 * 
+	 *
 	 * @return SteamID Fluent interface
 	 */
 	public function SetAccountUniverse( $Value ) : SteamID
 	{
 		$this->Set( 56, '255', $Value ); // 255 = 0xFF
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * @param int $BitOffset
 	 * @param int|string $ValueMask
-	 * 
+	 *
 	 * @return \GMP
 	 */
 	private function Get( int $BitOffset, $ValueMask ) : \GMP
 	{
 		return gmp_and( self::ShiftRight( $this->Data, $BitOffset ), $ValueMask );
 	}
-	
+
 	/**
 	 * @param int $BitOffset
 	 * @param int|string $ValueMask
 	 * @param int|string $Value
-	 * 
+	 *
 	 * @return void
 	 */
 	private function Set( int $BitOffset, $ValueMask, $Value ) : void
@@ -744,10 +744,10 @@ class SteamID
 			self::ShiftLeft( gmp_and( $Value, $ValueMask ), $BitOffset )
 		);
 	}
-	
+
 	/**
 	 * Shift the bits of $x by $n steps to the left
-	 * 
+	 *
 	 * @param int|string|\GMP $x
 	 * @param int $n
 	 *
@@ -757,10 +757,10 @@ class SteamID
 	{
 		return gmp_mul( $x, gmp_pow( 2, $n ) );
 	}
-	
+
 	/**
 	 * Shift the bits of $x by $n steps to the right
-	 * 
+	 *
 	 * @param int|string|\GMP $x
 	 * @param int $n
 	 *
@@ -770,7 +770,7 @@ class SteamID
 	{
 		return gmp_div_q( $x, gmp_pow( 2, $n ) );
 	}
-	
+
 	/**
 	 * This is way more restrictive than php's is_numeric()
 	 *
