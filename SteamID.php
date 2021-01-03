@@ -8,8 +8,6 @@ declare(strict_types=1);
  * This 64bit structure is used for identifying various objects on the Steam
  * network.
  *
- * This library requires GMP module to be installed.
- *
  * This implementation was ported from SteamKit:
  * {@link https://github.com/SteamRE/SteamKit/blob/master/SteamKit2/SteamKit2/Types/SteamID.cs}
  *
@@ -108,7 +106,10 @@ class SteamID
 	const VanityGroup      = 2;
 	const VanityGameGroup  = 3;
 
-	private \GMP $Data;
+	private int $ID = 0;
+	private int $Instance = 0;
+	private int $Type = 0;
+	private int $Universe = 0;
 
 	/**
 	 * Initializes a new instance of the SteamID class.
@@ -117,7 +118,10 @@ class SteamID
 	 */
 	public function __construct( int|string|null $Value = null )
 	{
-		$this->Data = gmp_init( 0 );
+		if( PHP_INT_SIZE !== 8 )
+		{
+			throw new \RuntimeException( '64-bit PHP is required.' );
+		}
 
 		if( $Value === null )
 		{
@@ -127,10 +131,10 @@ class SteamID
 		// SetFromString
 		if( preg_match( '/^STEAM_([0-4]):([0-1]):([0-9]{1,10})$/', (string)$Value, $Matches ) === 1 )
 		{
-			$AccountID = $Matches[ 3 ];
+			$AccountID = (int)$Matches[ 3 ];
 
 			// Check for max unsigned 32-bit number
-			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
+			if( $AccountID > 4294967295 )
 			{
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
@@ -144,7 +148,7 @@ class SteamID
 			}
 
 			$AuthServer = (int)$Matches[ 2 ];
-			$AccountID = ( (int)$AccountID << 1 ) | $AuthServer;
+			$AccountID = ( $AccountID << 1 ) | $AuthServer;
 
 			$this->SetAccountUniverse( $Universe );
 			$this->SetAccountInstance( self::DesktopInstance );
@@ -154,10 +158,10 @@ class SteamID
 		// SetFromSteam3String
 		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
 		{
-			$AccountID = $Matches[ 3 ];
+			$AccountID = (int)$Matches[ 3 ];
 
 			// Check for max unsigned 32-bit number
-			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
+			if( $AccountID > 4294967295 )
 			{
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
@@ -212,7 +216,7 @@ class SteamID
 		}
 		else if( self::IsNumeric( $Value ) )
 		{
-			$this->Data = gmp_init( $Value, 10 );
+			$this->ParseUInt64( (int)$Value );
 		}
 		else
 		{
@@ -227,13 +231,13 @@ class SteamID
 	 */
 	public function RenderSteam2() : string
 	{
-		switch( $this->GetAccountType() )
+		switch( $this->Type )
 		{
 			case self::TypeInvalid:
 			case self::TypeIndividual:
 			{
-				$Universe = $this->GetAccountUniverse();
-				$AccountID = $this->GetAccountID();
+				$Universe = $this->Universe;
+				$AccountID = $this->ID;
 
 				return 'STEAM_' . $Universe . ':' . ( $AccountID & 1 ) . ':' .
 					( $AccountID >> 1 );
@@ -252,8 +256,8 @@ class SteamID
 	 */
 	public function RenderSteam3() : string
 	{
-		$AccountInstance = $this->GetAccountInstance();
-		$AccountType = $this->GetAccountType();
+		$AccountInstance = $this->Instance;
+		$AccountType = $this->Type;
 		$AccountTypeChar = self::$AccountTypeChars[ $AccountType ] ?? 'i';
 
 		$RenderInstance = false;
@@ -282,8 +286,7 @@ class SteamID
 			}
 		}
 
-		$Return = '[' . $AccountTypeChar . ':' . $this->GetAccountUniverse() .
-			':' . $this->GetAccountID();
+		$Return = '[' . $AccountTypeChar . ':' . $this->Universe . ':' . $this->ID;
 
 		if( $RenderInstance )
 		{
@@ -304,12 +307,12 @@ class SteamID
 	 */
 	public function RenderSteamInvite() : string
 	{
-		switch( $this->GetAccountType() )
+		switch( $this->Type )
 		{
 			case self::TypeInvalid:
 			case self::TypeIndividual:
 			{
-				$Code = dechex( $this->GetAccountID() );
+				$Code = dechex( $this->ID );
 				$Code = strtr( $Code, self::$SteamInviteDictionary );
 				$Length = strlen( $Code );
 
@@ -341,15 +344,13 @@ class SteamID
 	 */
 	public function RenderCsgoFriendCode() : string
 	{
-		$AccountType = $this->GetAccountType();
-
-		if( $AccountType !== self::TypeInvalid && $AccountType !== self::TypeIndividual )
+		if( $this->Type !== self::TypeInvalid && $this->Type !== self::TypeIndividual )
 		{
 			throw new InvalidArgumentException( 'This can only be used on Individual SteamID.' );
 		}
 
 		// Shift by string "CSGO" (0x4353474)
-		$Hash = gmp_or( $this->GetAccountID(), '0x4353474F00000000' );
+		$Hash = $this->ID | 0x4353474F00000000;
 
 		// Convert it to little-endian
 		$Hash = gmp_export( $Hash, 8, GMP_LITTLE_ENDIAN );
@@ -360,22 +361,21 @@ class SteamID
 		// Take the first 4 bytes and convert it back to a number
 		$Hash = gmp_import( substr( $Hash, 0, 4 ), 4, GMP_LITTLE_ENDIAN );
 
-		$Result = gmp_init( 0 );
+		$Id = $this->ID;
+		$Result = 0;
 
 		for( $i = 0; $i < 8; $i++ )
 		{
-			$IdNibble = $this->Get( 4 * $i, '0xF' );
-			$HashNibble = gmp_and( self::ShiftRight( $Hash, $i ), 1 );
+			$IdNibble = $Id & 0xF;
+			$Id >>= 4;
+			$HashNibble = ( $Hash >> $i ) & 1;
 
-			$a = gmp_or( self::ShiftLeft( $Result, 4 ), $IdNibble );
+			$a = ( $Result << 4 ) | $IdNibble;
 
 			// Valve certainly knows how to turn accountid into
 			// a complicated algorhitm for no good reason
-			$Result = gmp_or( self::ShiftLeft( self::ShiftRight( $Result, 28 ), 32 ), $a );
-			$Result = gmp_or(
-				self::ShiftLeft( self::ShiftRight( $Result, 31 ), 32 ),
-				gmp_or( self::ShiftLeft( $a, 1 ), $HashNibble )
-			);
+			$Result = ( ( $Result << 28 ) >> 32 ) | $a;
+			$Result = ( ( $Result >> 31 ) << 32 ) | ( ( $a << 1 ) | $HashNibble );
 		}
 
 		// Is there a better way of doing this?
@@ -390,8 +390,8 @@ class SteamID
 				$FriendCode .= '-';
 			}
 
-			$FriendCode .= $Base32[ gmp_intval( gmp_and( $Result, 31 ) ) ];
-			$Result = self::ShiftRight( $Result, 5 );
+			$FriendCode .= $Base32[ (int)( $Result & 31 ) ];
+			$Result = $Result >> 5;
 		}
 
 		// Strip the AAAA- prefix
@@ -405,22 +405,22 @@ class SteamID
 	 */
 	public function IsValid() : bool
 	{
-		$AccountType = $this->GetAccountType();
+		$AccountType = $this->Type;
 
 		if( $AccountType <= self::TypeInvalid || $AccountType > self::TypeAnonUser )
 		{
 			return false;
 		}
 
-		$AccountUniverse = $this->GetAccountUniverse();
+		$AccountUniverse = $this->Universe;
 
 		if( $AccountUniverse <= self::UniverseInvalid || $AccountUniverse > self::UniverseDev )
 		{
 			return false;
 		}
 
-		$AccountID = $this->GetAccountID();
-		$AccountInstance = $this->GetAccountInstance();
+		$AccountID = $this->ID;
+		$AccountInstance = $this->Instance;
 
 		if( $AccountType === self::TypeIndividual )
 		{
@@ -466,7 +466,7 @@ class SteamID
 	 * Example implementation is provided in `VanityURLs.php` file.
 	 *
 	 * @param string $Value Input URL
-	 * @param callable $VanityCallback Callback which is called when a vanity lookup is required
+	 * @param callable(string, int):?string $VanityCallback Callback which is called when a vanity lookup is required
 	 *
 	 * @throws InvalidArgumentException
 	 *
@@ -539,7 +539,7 @@ class SteamID
 	{
 		if( self::IsNumeric( $Value ) )
 		{
-			$this->Data = gmp_init( $Value, 10 );
+			$this->ParseUInt64( (int)$Value );
 		}
 		else
 		{
@@ -550,14 +550,18 @@ class SteamID
 	}
 
 	/**
-	 * Converts this SteamID into it's 64bit integer form. This function returns
-	 * as a string to work on 32-bit PHP systems.
+	 * Converts this SteamID into it's 64bit integer form.
 	 *
 	 * @return string A 64bit integer representing this SteamID.
 	 */
 	public function ConvertToUInt64() : string
 	{
-		return gmp_strval( $this->Data );
+		$ID = ( $this->Universe << 56 )
+			| ( $this->Type << 52 )
+			| ( $this->Instance << 32 )
+			| ( $this->ID );
+
+		return (string)$ID;
 	}
 
 	/**
@@ -591,14 +595,11 @@ class SteamID
 			$Left = self::DecodeCsgoCode( substr( $Value, 0, 10 ) );
 			$Right = self::DecodeCsgoCode( substr( $Value, 11, 10 ) );
 
-			$AccountId = gmp_intval( gmp_add(
-				gmp_and( $Left, '0x0000FFFF' ),
-				self::ShiftLeft( gmp_and( $Right, '0x0000FFFF' ), 16 )
-			) );
+			$AccountId = ( $Left & 0x0000FFFF ) + ( ( $Right & 0x0000FFFF ) << 16 );
 
 			$IsGroup =
-				gmp_and( $Left, '0xFFFF0000' ) == 0x10000 &&
-				gmp_and( $Right, '0xFFFF0000' ) == 0x10000;
+				( $Left & 0xFFFF0000 ) == 0x10000 &&
+				( $Right & 0xFFFF0000 ) == 0x10000;
 
 			$this->SetAccountID( $AccountId );
 			$this->SetAccountType( $IsGroup ? self::TypeClan : self::TypeIndividual );
@@ -624,7 +625,7 @@ class SteamID
 		$Value = str_replace( '-', '', $Value );
 
 		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-		$Result = gmp_init( 0 );
+		$Result = 0;
 
 		for( $i = 0; $i < 13; $i++ )
 		{
@@ -635,23 +636,25 @@ class SteamID
 				throw new InvalidArgumentException( 'Given input is malformed.' );
 			}
 
-			$Result = gmp_or( $Result, self::ShiftLeft( $Character, 5 * $i ) );
+			// TODO: This shiftleft can overflow 64bit signed integer, sigh.
+			$Result = $Result | self::ShiftLeft( $Character, 5 * $i );
 		}
 
 		// Is there a way to avoid this?
 		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
+		$Result = (int)$Result;
 		$AccountId = 0;
 
 		for( $i = 0; $i < 8; $i++ )
 		{
-			$Result = self::ShiftRight( $Result, 1 );
-			$IdNibble = gmp_and( $Result, '0xF' );
-			$Result = self::ShiftRight( $Result, 4 );
+			$Result = $Result >> 1;
+			$IdNibble = $Result & 0xF;
+			$Result = $Result >> 4;
 
-			$AccountId = gmp_or( self::ShiftLeft( $AccountId, 4 ), $IdNibble );
+			$AccountId = ( $AccountId << 4 ) | $IdNibble;
 		}
 
-		return gmp_intval( $AccountId );
+		return $AccountId;
 	}
 
 	/**
@@ -661,7 +664,7 @@ class SteamID
 	 */
 	public function GetAccountID() : int
 	{
-		return gmp_intval( $this->Get( 0, '4294967295' ) ); // 4294967295 = 0xFFFFFFFF
+		return $this->ID;
 	}
 
 	/**
@@ -671,7 +674,7 @@ class SteamID
 	 */
 	public function GetAccountInstance() : int
 	{
-		return gmp_intval( $this->Get( 32, '1048575' ) ); // 1048575 = 0xFFFFF
+		return $this->Instance;
 	}
 
 	/**
@@ -681,7 +684,7 @@ class SteamID
 	 */
 	public function GetAccountType() : int
 	{
-		return gmp_intval( $this->Get( 52, '15' ) ); // 15 = 0xF
+		return $this->Type;
 	}
 
 	/**
@@ -691,24 +694,24 @@ class SteamID
 	 */
 	public function GetAccountUniverse() : int
 	{
-		return gmp_intval( $this->Get( 56, '255' ) ); // 255 = 0xFF
+		return $this->Universe;
 	}
 
 	/**
 	 * Sets the account id.
 	 *
-	 * @param int|string $Value The account id.
+	 * @param int $Value The account id.
 	 *
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountID( int|string $Value ) : self
+	public function SetAccountID( int $Value ) : self
 	{
 		if( $Value < 0 || $Value > 0xFFFFFFFF )
 		{
 			throw new InvalidArgumentException( 'Account id can not be higher than 0xFFFFFFFF.' );
 		}
 
-		$this->Set( 0, '4294967295', $Value ); // 4294967295 = 0xFFFFFFFF
+		$this->ID = $Value;
 
 		return $this;
 	}
@@ -727,7 +730,7 @@ class SteamID
 			throw new InvalidArgumentException( 'Account instance can not be higher than 0xFFFFF.' );
 		}
 
-		$this->Set( 32, '1048575', $Value ); // 1048575 = 0xFFFFF
+		$this->Instance = $Value;
 
 		return $this;
 	}
@@ -746,7 +749,7 @@ class SteamID
 			throw new InvalidArgumentException( 'Account type can not be higher than 0xF.' );
 		}
 
-		$this->Set( 52, '15', $Value ); // 15 = 0xF
+		$this->Type = $Value;
 
 		return $this;
 	}
@@ -765,22 +768,22 @@ class SteamID
 			throw new InvalidArgumentException( 'Account universe can not be higher than 0xFF.' );
 		}
 
-		$this->Set( 56, '255', $Value ); // 255 = 0xFF
+		$this->Universe = $Value;
 
 		return $this;
 	}
 
-	private function Get( int $BitOffset, int|string $ValueMask ) : \GMP
+	/**
+	 * Splits 64-bit steamid into individual components.
+	 *
+	 * @param int $Value 64-bit steamid
+	 */
+	private function ParseUInt64( int $Value ) : void
 	{
-		return gmp_and( self::ShiftRight( $this->Data, $BitOffset ), $ValueMask );
-	}
-
-	private function Set( int $BitOffset, int|string $ValueMask, int|string $Value ) : void
-	{
-		$this->Data = gmp_or(
-			gmp_and( $this->Data, gmp_com( self::ShiftLeft( $ValueMask, $BitOffset ) ) ),
-			self::ShiftLeft( gmp_and( $Value, $ValueMask ), $BitOffset )
-		);
+		$this->Universe = $Value >> 56;
+		$this->Type = ( $Value >> 52 ) & 0xF;
+		$this->Instance = ( $Value >> 32 ) & 0xFFFFF;
+		$this->ID = $Value & 0xFFFFFFFF;
 	}
 
 	/**
@@ -789,14 +792,6 @@ class SteamID
 	private static function ShiftLeft( int|string|\GMP $x, int $n ) : \GMP
 	{
 		return gmp_mul( $x, gmp_pow( 2, $n ) );
-	}
-
-	/**
-	 * Shift the bits of $x by $n steps to the right.
-	 */
-	private static function ShiftRight( int|string|\GMP $x, int $n ) : \GMP
-	{
-		return gmp_div_q( $x, gmp_pow( 2, $n ) );
 	}
 
 	/**

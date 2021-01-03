@@ -8,8 +8,7 @@ This library does not use subtraction hacks like described on
 [Valve Developer Wiki](https://developer.valvesoftware.com/wiki/SteamID), 
 or used in many other functions.
 
-SteamID.php requires modern PHP version, and [GMP module](http://php.net/manual/en/book.gmp.php)
-to be installed to perform operations 64-bit math.
+SteamID.php requires modern PHP version. Must be 64-bit.
 
 ## Brief overview
 
