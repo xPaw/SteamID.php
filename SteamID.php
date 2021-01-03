@@ -672,6 +672,11 @@ class SteamID
 	 */
 	public function SetAccountID( $Value ) : SteamID
 	{
+		if( $Value < 0 || $Value > 0xFFFFFFFF )
+		{
+			throw new InvalidArgumentException( 'Account id can not be higher than 0xFFFFFFFF.' );
+		}
+
 		$this->Set( 0, '4294967295', $Value ); // 4294967295 = 0xFFFFFFFF
 
 		return $this;
@@ -686,6 +691,11 @@ class SteamID
 	 */
 	public function SetAccountInstance( int $Value ) : SteamID
 	{
+		if( $Value < 0 || $Value > 0xFFFFF )
+		{
+			throw new InvalidArgumentException( 'Account instance can not be higher than 0xFFFFF.' );
+		}
+
 		$this->Set( 32, '1048575', $Value ); // 1048575 = 0xFFFFF
 
 		return $this;
@@ -700,6 +710,11 @@ class SteamID
 	 */
 	public function SetAccountType( int $Value ) : SteamID
 	{
+		if( $Value < 0 || $Value > 0xF )
+		{
+			throw new InvalidArgumentException( 'Account type can not be higher than 0xF.' );
+		}
+
 		$this->Set( 52, '15', $Value ); // 15 = 0xF
 
 		return $this;
@@ -714,6 +729,11 @@ class SteamID
 	 */
 	public function SetAccountUniverse( $Value ) : SteamID
 	{
+		if( $Value < 0 || $Value > 0xFF )
+		{
+			throw new InvalidArgumentException( 'Account universe can not be higher than 0xFF.' );
+		}
+
 		$this->Set( 56, '255', $Value ); // 255 = 0xFF
 
 		return $this;

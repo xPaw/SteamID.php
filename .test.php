@@ -362,7 +362,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$a = new SteamID( '[U:1:4294967295]' );
 		$this->assertEquals( 'S9999-986R', $a->RenderCsgoFriendCode() );
 
-		$a = new SteamID( '[I:4:12229257:1234567]' );
+		$a = new SteamID( '[I:4:12229257:1048575]' );
 		$this->assertEquals( 'ALQF4-BYCA', $a->RenderCsgoFriendCode() );
 
 		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'ALQF4-BYCA' );
@@ -378,6 +378,34 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		// Generated id without md5 niblets ($HashNibble=1), still parses because parser ignores it
 		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'AQQP4-BZDC' );
 		$this->assertEquals( '[U:1:12229257]', $a->RenderSteam3() );
+	}
+
+	public function testAccountIdMaxValue( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+
+		( new SteamID() )->SetAccountID( 0xFFFFFFFF + 1 );
+	}
+
+	public function testAccountTypeMaxValue( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+
+		( new SteamID() )->SetAccountType( 0xF + 1 );
+	}
+
+	public function testAccountInstanceMaxValue( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+
+		( new SteamID() )->SetAccountInstance( 0xFFFFF + 1 );
+	}
+
+	public function testAccountUniverseMaxValue( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+
+		( new SteamID() )->SetAccountUniverse( 0xFF + 1 );
 	}
 
 	public function steam3StringProvider( ) : array
