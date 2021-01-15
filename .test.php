@@ -354,13 +354,16 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->assertEquals( 'SFW3A-MPAQ', $a->RenderCsgoFriendCode() );
 
 		$a = new SteamID( '[U:1:0]' );
-		$this->assertEquals( 'AEAAA-AABC', $a->RenderCsgoFriendCode() );
+		$this->assertEquals( 'AEJJS-ABCA', $a->RenderCsgoFriendCode() );
 
 		$a = new SteamID( '[U:1:1]' );
 		$this->assertEquals( 'AJJJS-ABAA', $a->RenderCsgoFriendCode() );
 
 		$a = new SteamID( '[U:1:4294967295]' );
-		$this->assertEquals( 'S9999-986R', $a->RenderCsgoFriendCode() );
+		$this->assertEquals( 'S9ZZR-999P', $a->RenderCsgoFriendCode() );
+
+		$a = new SteamID( '[U:1:501294967]' );
+		$this->assertEquals( 'S335T-46EG', $a->RenderCsgoFriendCode() );
 
 		$a = new SteamID( '[I:4:12229257:1048575]' );
 		$this->assertEquals( 'ALQF4-BYCA', $a->RenderCsgoFriendCode() );

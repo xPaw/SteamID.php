@@ -364,8 +364,7 @@ class SteamID
 		$Hash = md5( $Hash, true );
 
 		// Take the first 4 bytes and convert it back to a number
-		// not using gmp as it is 32-bit
-		$Hash = unpack( 'i', substr( $Hash, 0, 4 ) )[ 1 ];
+		$Hash = gmp_import( substr( $Hash, 0, 4 ), 4, GMP_LITTLE_ENDIAN );
 
 		$Result = gmp_init( 0 );
 
