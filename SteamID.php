@@ -397,7 +397,7 @@ class SteamID
 				$FriendCode .= '-';
 			}
 
-			$FriendCode .= $Base32[ (int)gmp_and( $Result, 31 ) ];
+			$FriendCode .= $Base32[ gmp_intval( gmp_and( $Result, 31 ) ) ];
 			$Result = self::ShiftRight( $Result, 5 );
 		}
 
