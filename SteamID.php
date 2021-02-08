@@ -481,14 +481,14 @@ class SteamID
 	 */
 	public static function SetFromURL( string $Value, callable $VanityCallback ) : SteamID
 	{
-		if( preg_match( '/^https?:\/\/steamcommunity\.com\/profiles\/(.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
+		if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/profiles\/(?P<id>.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
-			$Value = $Matches[ 1 ];
+			$Value = $Matches[ 'id' ];
 		}
-		else if( preg_match( '/^https?:\/\/steamcommunity\.com\/(id|groups|games)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1
-		||       preg_match( '/^()([\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
+		else if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/(?P<type>id|groups|games)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1
+		||       preg_match( '/^(?P<type>)(?P<id>[\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
 		{
-			$Length = strlen( $Matches[ 2 ] );
+			$Length = strlen( $Matches[ 'id' ] );
 
 			if( $Length < 2 || $Length > 32 )
 			{
@@ -496,9 +496,9 @@ class SteamID
 			}
 
 			// Steam doesn't allow vanity urls to be valid steamids
-			if( self::IsNumeric( $Matches[ 2 ] ) )
+			if( self::IsNumeric( $Matches[ 'id' ] ) )
 			{
-				$SteamID = new SteamID( $Matches[ 2 ] );
+				$SteamID = new SteamID( $Matches[ 'id' ] );
 
 				if( $SteamID->IsValid() )
 				{
@@ -506,23 +506,23 @@ class SteamID
 				}
 			}
 
-			switch( $Matches[ 1 ] )
+			switch( $Matches[ 'type' ] )
 			{
 				case 'groups': $VanityType = self::VanityGroup; break;
 				case 'games' : $VanityType = self::VanityGameGroup; break;
 				default      : $VanityType = self::VanityIndividual;
 			}
 
-			$Value = call_user_func( $VanityCallback, $Matches[ 2 ], $VanityType );
+			$Value = call_user_func( $VanityCallback, $Matches[ 'id' ], $VanityType );
 
 			if( $Value === null )
 			{
 				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.' );
 			}
 		}
-		else if( preg_match( '/^https?:\/\/(steamcommunity\.com\/user|s\.team\/p)\/([\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
+		else if( preg_match( '/^https?:\/\/(?:(?:my\.steamchina|steamcommunity)\.com\/user|s\.team\/p)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
-			$Value = strtolower( $Matches[ 2 ] );
+			$Value = strtolower( $Matches[ 'id' ] );
 			$Value = preg_replace( '/[^' . implode( '', self::$SteamInviteDictionary ) . ']/', '', $Value );
 			$Value = strtr( $Value, array_flip( self::$SteamInviteDictionary ) );
 			$Value = hexdec( $Value );
