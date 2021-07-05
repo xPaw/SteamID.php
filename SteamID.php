@@ -284,12 +284,6 @@ class SteamID
 
 				break;
 			}
-			case self::TypeIndividual:
-			{
-				$RenderInstance = $AccountInstance != self::DesktopInstance;
-
-				break;
-			}
 		}
 
 		$Return = '[' . $AccountTypeChar . ':' . $this->GetAccountUniverse() .
