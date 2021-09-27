@@ -22,7 +22,7 @@ declare(strict_types=1);
 class SteamID
 {
 	/**
-	 * @var array Types of steam account
+	 * @var array<int, string> Types of steam account
 	 */
 	private static $AccountTypeChars =
 	[
@@ -39,7 +39,7 @@ class SteamID
 	];
 
 	/**
-	 * @var array List of replacement hex characters used in /user/ URLs
+	 * @var array<int|string, string> List of replacement hex characters used in /user/ URLs
 	 */
 	private static $SteamInviteDictionary =
 	[
@@ -200,7 +200,10 @@ class SteamID
 			}
 			else
 			{
-				$this->SetAccountType( array_search( $Type, self::$AccountTypeChars, true ) );
+				/** @var int $AccountType */
+				$AccountType = array_search( $Type, self::$AccountTypeChars, true );
+
+				$this->SetAccountType( $AccountType );
 			}
 
 			$this->SetAccountUniverse( (int)$Matches[ 2 ] );
@@ -513,7 +516,7 @@ class SteamID
 		{
 			$Value = strtolower( $Matches[ 'id' ] );
 			$Value = preg_replace( '/[^' . implode( '', self::$SteamInviteDictionary ) . ']/', '', $Value );
-			$Value = strtr( $Value, array_flip( self::$SteamInviteDictionary ) );
+			$Value = strtr( (string)$Value, array_flip( self::$SteamInviteDictionary ) );
 			$Value = hexdec( $Value );
 
 			$Value = '[U:1:' . $Value . ']';
@@ -572,7 +575,7 @@ class SteamID
 		if( $Length === 10 ) // Friend codes
 		{
 			$AccountId = self::DecodeCsgoCode( $Value );
-			$this->SetAccountID( gmp_intval( $AccountId ) );
+			$this->SetAccountID( $AccountId );
 			$this->SetAccountType( self::TypeIndividual );
 			$this->SetAccountUniverse( self::UniversePublic );
 			$this->SetAccountInstance( 1 );
@@ -587,16 +590,16 @@ class SteamID
 			$Left = self::DecodeCsgoCode( substr( $Value, 0, 10 ) );
 			$Right = self::DecodeCsgoCode( substr( $Value, 11, 10 ) );
 
-			$AccountId = gmp_add(
+			$AccountId = gmp_intval( gmp_add(
 				gmp_and( $Left, '0x0000FFFF' ),
 				self::ShiftLeft( gmp_and( $Right, '0x0000FFFF' ), 16 )
-			);
+			) );
 
 			$IsGroup =
 				gmp_and( $Left, '0xFFFF0000' ) == 0x10000 &&
 				gmp_and( $Right, '0xFFFF0000' ) == 0x10000;
 
-			$this->SetAccountID( gmp_intval( $AccountId ) );
+			$this->SetAccountID( $AccountId );
 			$this->SetAccountType( $IsGroup ? self::TypeClan : self::TypeIndividual );
 			$this->SetAccountUniverse( self::UniversePublic );
 			$this->SetAccountInstance( 1 );
@@ -609,7 +612,7 @@ class SteamID
 		return $this;
 	}
 
-	private static function DecodeCsgoCode( string $Value ) : \GMP
+	private static function DecodeCsgoCode( string $Value ) : int
 	{
 		if( $Value[ 5 ] !== '-' )
 		{
@@ -647,7 +650,7 @@ class SteamID
 			$AccountId = gmp_or( self::ShiftLeft( $AccountId, 4 ), $IdNibble );
 		}
 
-		return $AccountId;
+		return gmp_intval( $AccountId );
 	}
 
 	/**

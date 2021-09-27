@@ -1,0 +1,8 @@
+parameters:
+	checkMissingIterableValueType: true
+	checkFunctionNameCase: true
+	level: 8
+	paths:
+		- .
+	excludes_analyse:
+		- vendor
