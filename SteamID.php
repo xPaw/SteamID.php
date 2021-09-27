@@ -95,7 +95,7 @@ class SteamID
 
 	/**
 	 * Special flags for Chat accounts - they go in the top 8 bits
-	 * of the steam ID's "instance", leaving 12 for the actual instances
+	 * of the steam ID's "instance", leaving 12 for the actual instances.
 	 */
 	const InstanceFlagClan     = 524288; // ( k_unSteamAccountInstanceMask + 1 ) >> 1
 	const InstanceFlagLobby    = 262144; // ( k_unSteamAccountInstanceMask + 1 ) >> 2
@@ -254,9 +254,7 @@ class SteamID
 	{
 		$AccountInstance = $this->GetAccountInstance();
 		$AccountType = $this->GetAccountType();
-		$AccountTypeChar = isset( self::$AccountTypeChars[ $AccountType ] ) ?
-			self::$AccountTypeChars[ $AccountType ] :
-			'i';
+		$AccountTypeChar = self::$AccountTypeChars[ $AccountType ] ?? 'i';
 
 		$RenderInstance = false;
 
@@ -264,11 +262,11 @@ class SteamID
 		{
 			case self::TypeChat:
 			{
-				if( $AccountInstance & SteamID::InstanceFlagClan )
+				if( $AccountInstance & self::InstanceFlagClan )
 				{
 					$AccountTypeChar = 'c';
 				}
-				else if( $AccountInstance & SteamID::InstanceFlagLobby )
+				else if( $AccountInstance & self::InstanceFlagLobby )
 				{
 					$AccountTypeChar = 'L';
 				}
@@ -299,6 +297,8 @@ class SteamID
 	 * Renders this instance into Steam's new invite code. Which can be formatted as:
 	 * http://s.team/p/%s
 	 * https://steamcommunity.com/user/%s
+	 *
+	 * @throws InvalidArgumentException
 	 *
 	 * @return string A Steam invite code which can be used in a URL.
 	 */
@@ -334,6 +334,8 @@ class SteamID
 	 *
 	 * Based on <https://github.com/emily33901/go-csfriendcode>
 	 * and looking at CSGO's client.dll.
+	 *
+	 * @throws InvalidArgumentException
 	 *
 	 * @return string A friend code which can be used in CS:GO.
 	 */
@@ -380,7 +382,6 @@ class SteamID
 		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
 		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 		$FriendCode = '';
-		$i = 0;
 
 		for( $i = 0; $i < 13; $i++ )
 		{
@@ -423,7 +424,7 @@ class SteamID
 
 		if( $AccountType === self::TypeIndividual )
 		{
-			if( $AccountID == 0 || $AccountInstance > self::WebInstance )
+			if( $AccountID === 0 || $AccountInstance > self::WebInstance )
 			{
 				return false;
 			}
@@ -431,7 +432,7 @@ class SteamID
 
 		if( $AccountType === self::TypeClan )
 		{
-			if( $AccountID == 0 || $AccountInstance != 0 )
+			if( $AccountID === 0 || $AccountInstance !== 0 )
 			{
 				return false;
 			}
@@ -439,7 +440,7 @@ class SteamID
 
 		if( $AccountType === self::TypeGameServer )
 		{
-			if( $AccountID == 0 )
+			if( $AccountID === 0 )
 			{
 				return false;
 			}
@@ -467,11 +468,11 @@ class SteamID
 	 * @param string $Value Input URL
 	 * @param callable $VanityCallback Callback which is called when a vanity lookup is required
 	 *
-	 * @return SteamID Fluent interface
-	 *
 	 * @throws InvalidArgumentException
+	 *
+	 * @return SteamID Fluent interface
 	 */
-	public static function SetFromURL( string $Value, callable $VanityCallback ) : SteamID
+	public static function SetFromURL( string $Value, callable $VanityCallback ) : self
 	{
 		if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/profiles\/(?P<id>.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
@@ -490,7 +491,7 @@ class SteamID
 			// Steam doesn't allow vanity urls to be valid steamids
 			if( self::IsNumeric( $Matches[ 'id' ] ) )
 			{
-				$SteamID = new SteamID( $Matches[ 'id' ] );
+				$SteamID = new self( $Matches[ 'id' ] );
 
 				if( $SteamID->IsValid() )
 				{
@@ -522,7 +523,7 @@ class SteamID
 			$Value = '[U:1:' . $Value . ']';
 		}
 
-		return new SteamID( $Value );
+		return new self( $Value );
 	}
 
 	/**
@@ -530,11 +531,11 @@ class SteamID
 	 *
 	 * @param int|string $Value The 64bit integer to assign this SteamID from.
 	 *
-	 * @return SteamID Fluent interface
-	 *
 	 * @throws InvalidArgumentException
+	 *
+	 * @return SteamID Fluent interface
 	 */
-	public function SetFromUInt64( int|string $Value ) : SteamID
+	public function SetFromUInt64( int|string $Value ) : self
 	{
 		if( self::IsNumeric( $Value ) )
 		{
@@ -564,11 +565,11 @@ class SteamID
 	 *
 	 * @param string $Value The CS:GO friend code.
 	 *
-	 * @return SteamID Fluent interface
-	 *
 	 * @throws InvalidArgumentException
+	 *
+	 * @return SteamID Fluent interface
 	 */
-	public function SetFromCsgoFriendCode( string $Value ) : SteamID
+	public function SetFromCsgoFriendCode( string $Value ) : self
 	{
 		$Length = strlen( $Value );
 
@@ -700,7 +701,7 @@ class SteamID
 	 *
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountID( int|string $Value ) : SteamID
+	public function SetAccountID( int|string $Value ) : self
 	{
 		if( $Value < 0 || $Value > 0xFFFFFFFF )
 		{
@@ -719,7 +720,7 @@ class SteamID
 	 *
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountInstance( int $Value ) : SteamID
+	public function SetAccountInstance( int $Value ) : self
 	{
 		if( $Value < 0 || $Value > 0xFFFFF )
 		{
@@ -738,7 +739,7 @@ class SteamID
 	 *
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountType( int $Value ) : SteamID
+	public function SetAccountType( int $Value ) : self
 	{
 		if( $Value < 0 || $Value > 0xF )
 		{
@@ -757,7 +758,7 @@ class SteamID
 	 *
 	 * @return SteamID Fluent interface
 	 */
-	public function SetAccountUniverse( int $Value ) : SteamID
+	public function SetAccountUniverse( int $Value ) : self
 	{
 		if( $Value < 0 || $Value > 0xFF )
 		{
@@ -783,7 +784,7 @@ class SteamID
 	}
 
 	/**
-	 * Shift the bits of $x by $n steps to the left
+	 * Shift the bits of $x by $n steps to the left.
 	 */
 	private static function ShiftLeft( int|string|\GMP $x, int $n ) : \GMP
 	{
@@ -791,7 +792,7 @@ class SteamID
 	}
 
 	/**
-	 * Shift the bits of $x by $n steps to the right
+	 * Shift the bits of $x by $n steps to the right.
 	 */
 	private static function ShiftRight( int|string|\GMP $x, int $n ) : \GMP
 	{
@@ -799,7 +800,7 @@ class SteamID
 	}
 
 	/**
-	 * This is way more restrictive than php's is_numeric()
+	 * This is way more restrictive than php's is_numeric().
 	 */
 	private static function IsNumeric( int|string $n ) : bool
 	{
