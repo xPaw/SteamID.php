@@ -474,7 +474,7 @@ class SteamID
 	 */
 	public static function SetFromURL( string $Value, callable $VanityCallback ) : self
 	{
-		if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/profiles\/(?P<id>.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
+		if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/(?P<type>profiles|gid)\/(?P<id>.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
 			$Value = $Matches[ 'id' ];
 		}

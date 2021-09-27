@@ -269,6 +269,12 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->assertEquals( '[U:1:12229257]', $s->RenderSteam3() );
 	}
 
+	public function testSetFromGidUrl( ) : void
+	{
+		$s = SteamID::SetFromURL( 'https://steamcommunity.com/gid/103582791433666425', [ $this, 'fakeResolveVanityURL' ] );
+		$this->assertEquals( '[g:1:4145017]', $s->RenderSteam3() );
+	}
+
 	public function testInvalidSteamInviteType( ) : void
 	{
 		$this->expectException( InvalidArgumentException::class );
@@ -557,6 +563,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
 			[ 'http://steamcommunity.com/profiles/76561197960265733/games' ],
 			[ 'https://steamcommunity.com/profiles/76561210845167618' ],
+			[ 'https://steamcommunity.com/gid/103582791433666425' ],
 			[ 'http://my.steamchina.com/profiles/76561197960265733/games' ],
 			[ 'https://my.steamchina.com/profiles/76561210845167618' ],
 			[ 'http://my.steamchina.com/groups/valve/memberslistxml' ],
