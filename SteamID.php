@@ -572,9 +572,58 @@ class SteamID
 	 */
 	public function SetFromCsgoFriendCode( $Value ) : SteamID
 	{
-		if( !is_string( $Value ) || strlen( $Value ) !== 10 || $Value[ 5 ] !== '-' )
+		if( !is_string( $Value ) )
 		{
-			throw new InvalidArgumentException( 'Given input is not a valid CS:GO friend code.' );
+			throw new InvalidArgumentException( 'Must provide a string.' );
+		}
+
+		$Length = strlen( $Value );
+
+		if( $Length === 10 ) // Friend codes
+		{
+			$AccountId = self::DecodeCsgoCode( $Value );
+			$this->SetAccountID( $AccountId );
+			$this->SetAccountType( self::TypeIndividual );
+			$this->SetAccountUniverse( self::UniversePublic );
+			$this->SetAccountInstance( 1 );
+		}
+		else if( $Length === 21 ) // Private queue invite codes
+		{
+			if( $Value[ 10 ] !== '-' )
+			{
+				throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
+			}
+
+			$Left = self::DecodeCsgoCode( substr( $Value, 0, 10 ) );
+			$Right = self::DecodeCsgoCode( substr( $Value, 11, 10 ) );
+
+			$AccountId = gmp_add(
+				gmp_and( $Left, '0x0000FFFF' ),
+				self::ShiftLeft( gmp_and( $Right, '0x0000FFFF' ), 16 )
+			);
+
+			$IsGroup =
+				gmp_and( $Left, '0xFFFF0000' ) == 0x10000 &&
+				gmp_and( $Right, '0xFFFF0000' ) == 0x10000;
+
+			$this->SetAccountID( $AccountId );
+			$this->SetAccountType( $IsGroup ? self::TypeClan : self::TypeIndividual );
+			$this->SetAccountUniverse( self::UniversePublic );
+			$this->SetAccountInstance( 1 );
+		}
+		else
+		{
+			throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
+		}
+
+		return $this;
+	}
+
+	private static function DecodeCsgoCode( $Value )
+	{
+		if( $Value[ 5 ] !== '-' )
+		{
+			throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
 		}
 
 		$Value = 'AAAA-' . $Value;
@@ -608,12 +657,7 @@ class SteamID
 			$AccountId = gmp_or( self::ShiftLeft( $AccountId, 4 ), $IdNibble );
 		}
 
-		$this->SetAccountID( $AccountId );
-		$this->SetAccountType( self::TypeIndividual );
-		$this->SetAccountUniverse( self::UniversePublic );
-		$this->SetAccountInstance( 1 );
-
-		return $this;
+		return $AccountId;
 	}
 
 	/**

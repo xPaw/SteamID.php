@@ -332,7 +332,6 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 
 		$a = new SteamID( '[U:1:15]' );
 		$this->assertEquals( 'w', $a->RenderSteamInvite() );
-
 	}
 
 	/**
@@ -381,6 +380,60 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		// Generated id without md5 niblets ($HashNibble=1), still parses because parser ignores it
 		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'AQQP4-BZDC' );
 		$this->assertEquals( '[U:1:12229257]', $a->RenderSteam3() );
+
+		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'AQGPL-3EUJ-SYLSB-J5SL' );
+		$this->assertEquals( '[U:1:12229257]', $a->RenderSteam3() );
+
+		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'AJJA6-SSEL-AAJJE-AVBC' );
+		$this->assertEquals( '[U:1:1]', $a->RenderSteam3() );
+
+		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'ATWCB-GBBA-ABLAB-ABCC' );
+		$this->assertEquals( '[g:1:4777282]', $a->RenderSteam3() );
+	}
+
+	public function testInvalidFriendCodeLength( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID( );
+		$s->SetFromCsgoFriendCode( 'AAAAA-AAAA-AAAAA-AAAA-' );
+	}
+
+	public function testInvalidFriendCodeDash1( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID( );
+		$s->SetFromCsgoFriendCode( 'AAAAAAAAAA' );
+	}
+
+	public function testInvalidFriendCodeDash2( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID( );
+		$s->SetFromCsgoFriendCode( 'AAAAA-AAAA-AAAAAAAAAA' );
+	}
+
+	public function testInvalidFriendCodeDash3( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID( );
+		$s->SetFromCsgoFriendCode( 'AAAAAAAAAA-AAAAA-AAAA' );
+	}
+
+	public function testInvalidFriendCodeDash4( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID( );
+		$s->SetFromCsgoFriendCode( 'AAAAA-AAAAAAAAAA-AAAA' );
 	}
 
 	public function testAccountIdMaxValue( ) : void
