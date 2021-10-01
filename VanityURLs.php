@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/SteamID.php';
 
+use xPaw\SteamID\SteamID;
+
 // Simpler solution which doesn't perform any API requests and simply only works on /profiles/ urls
 $SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/profiles/[U:1:2]', function()
 {

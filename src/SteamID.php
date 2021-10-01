@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+namespace xPaw\SteamID;
+
 /**
  * The SteamID library provides an easy way to work with SteamIDs and makes
  * conversions easy. Ported from SteamKit.
@@ -136,7 +138,7 @@ class SteamID
 			// Check for max unsigned 32-bit number
 			if( $AccountID > 4294967295 )
 			{
-				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
+				throw new \InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
 
 			$Universe = (int)$Matches[ 1 ];
@@ -163,7 +165,7 @@ class SteamID
 			// Check for max unsigned 32-bit number
 			if( $AccountID > 4294967295 )
 			{
-				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
+				throw new \InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
 
 			$Type = $Matches[ 1 ];
@@ -220,7 +222,7 @@ class SteamID
 		}
 		else
 		{
-			throw new InvalidArgumentException( 'Provided SteamID is invalid.' );
+			throw new \InvalidArgumentException( 'Provided SteamID is invalid.' );
 		}
 	}
 
@@ -301,7 +303,7 @@ class SteamID
 	 * http://s.team/p/%s
 	 * https://steamcommunity.com/user/%s
 	 *
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *
 	 * @return string A Steam invite code which can be used in a URL.
 	 */
@@ -326,7 +328,7 @@ class SteamID
 			}
 			default:
 			{
-				throw new InvalidArgumentException( 'This can only be used on Individual SteamID.' );
+				throw new \InvalidArgumentException( 'This can only be used on Individual SteamID.' );
 			}
 		}
 	}
@@ -344,58 +346,7 @@ class SteamID
 	 */
 	public function RenderCsgoFriendCode() : string
 	{
-		if( $this->Type !== self::TypeInvalid && $this->Type !== self::TypeIndividual )
-		{
-			throw new InvalidArgumentException( 'This can only be used on Individual SteamID.' );
-		}
-
-		// Shift by string "CSGO" (0x4353474)
-		$Hash = $this->ID | 0x4353474F00000000;
-
-		// Convert it to little-endian
-		$Hash = gmp_export( $Hash, 8, GMP_LITTLE_ENDIAN );
-
-		// Hash the exported number
-		$Hash = md5( $Hash, true );
-
-		// Take the first 4 bytes and convert it back to a number
-		$Hash = gmp_import( substr( $Hash, 0, 4 ), 4, GMP_LITTLE_ENDIAN );
-
-		$Id = $this->ID;
-		$Result = 0;
-
-		for( $i = 0; $i < 8; $i++ )
-		{
-			$IdNibble = $Id & 0xF;
-			$Id >>= 4;
-			$HashNibble = ( $Hash >> $i ) & 1;
-
-			$a = ( $Result << 4 ) | $IdNibble;
-
-			// Valve certainly knows how to turn accountid into
-			// a complicated algorhitm for no good reason
-			$Result = ( ( $Result << 28 ) >> 32 ) | $a;
-			$Result = ( ( $Result >> 31 ) << 32 ) | ( ( $a << 1 ) | $HashNibble );
-		}
-
-		// Is there a better way of doing this?
-		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
-		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-		$FriendCode = '';
-
-		for( $i = 0; $i < 13; $i++ )
-		{
-			if( $i === 4 || $i === 9 )
-			{
-				$FriendCode .= '-';
-			}
-
-			$FriendCode .= $Base32[ (int)( $Result & 31 ) ];
-			$Result = $Result >> 5;
-		}
-
-		// Strip the AAAA- prefix
-		return substr( $FriendCode, 5 );
+		return \xPaw\SteamID\CSGO::RenderCsgoFriendCode( $this );
 	}
 
 	/**
@@ -468,7 +419,7 @@ class SteamID
 	 * @param string $Value Input URL
 	 * @param callable(string, int):?string $VanityCallback Callback which is called when a vanity lookup is required
 	 *
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *
 	 * @return SteamID Fluent interface
 	 */
@@ -485,7 +436,7 @@ class SteamID
 
 			if( $Length < 2 || $Length > 32 )
 			{
-				throw new InvalidArgumentException( 'Provided vanity url has bad length.' );
+				throw new \InvalidArgumentException( 'Provided vanity url has bad length.' );
 			}
 
 			// Steam doesn't allow vanity urls to be valid steamids
@@ -510,7 +461,7 @@ class SteamID
 
 			if( $Value === null )
 			{
-				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.' );
+				throw new \InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.' );
 			}
 		}
 		else if( preg_match( '/^https?:\/\/(?:(?:my\.steamchina|steamcommunity)\.com\/user|s\.team\/p)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
@@ -531,7 +482,7 @@ class SteamID
 	 *
 	 * @param int|string $Value The 64bit integer to assign this SteamID from.
 	 *
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *
 	 * @return SteamID Fluent interface
 	 */
@@ -543,7 +494,7 @@ class SteamID
 		}
 		else
 		{
-			throw new InvalidArgumentException( 'Provided SteamID is not numeric.' );
+			throw new \InvalidArgumentException( 'Provided SteamID is not numeric.' );
 		}
 
 		return $this;
@@ -562,99 +513,6 @@ class SteamID
 			| ( $this->ID );
 
 		return (string)$ID;
-	}
-
-	/**
-	 * Sets the account from the given CS:GO friend code (looks like SUCVS-FBAC).
-	 *
-	 * @param string $Value The CS:GO friend code.
-	 *
-	 * @throws InvalidArgumentException
-	 *
-	 * @return SteamID Fluent interface
-	 */
-	public function SetFromCsgoFriendCode( string $Value ) : self
-	{
-		$Length = strlen( $Value );
-
-		if( $Length === 10 ) // Friend codes
-		{
-			$AccountId = self::DecodeCsgoCode( $Value );
-			$this->SetAccountID( $AccountId );
-			$this->SetAccountType( self::TypeIndividual );
-			$this->SetAccountUniverse( self::UniversePublic );
-			$this->SetAccountInstance( 1 );
-		}
-		else if( $Length === 21 ) // Private queue invite codes
-		{
-			if( $Value[ 10 ] !== '-' )
-			{
-				throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
-			}
-
-			$Left = self::DecodeCsgoCode( substr( $Value, 0, 10 ) );
-			$Right = self::DecodeCsgoCode( substr( $Value, 11, 10 ) );
-
-			$AccountId = ( $Left & 0x0000FFFF ) + ( ( $Right & 0x0000FFFF ) << 16 );
-
-			$IsGroup =
-				( $Left & 0xFFFF0000 ) == 0x10000 &&
-				( $Right & 0xFFFF0000 ) == 0x10000;
-
-			$this->SetAccountID( $AccountId );
-			$this->SetAccountType( $IsGroup ? self::TypeClan : self::TypeIndividual );
-			$this->SetAccountUniverse( self::UniversePublic );
-			$this->SetAccountInstance( 1 );
-		}
-		else
-		{
-			throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
-		}
-
-		return $this;
-	}
-
-	private static function DecodeCsgoCode( string $Value ) : int
-	{
-		if( $Value[ 5 ] !== '-' )
-		{
-			throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
-		}
-
-		$Value = 'AAAA-' . $Value;
-		$Value = str_replace( '-', '', $Value );
-
-		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-		$Result = 0;
-
-		for( $i = 0; $i < 13; $i++ )
-		{
-			$Character = strpos( $Base32, $Value[ $i ] );
-
-			if( $Character === false )
-			{
-				throw new InvalidArgumentException( 'Given input is malformed.' );
-			}
-
-			// TODO: This shiftleft can overflow 64bit signed integer, sigh.
-			$Result = $Result | self::ShiftLeft( $Character, 5 * $i );
-		}
-
-		// Is there a way to avoid this?
-		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
-		$Result = (int)$Result;
-		$AccountId = 0;
-
-		for( $i = 0; $i < 8; $i++ )
-		{
-			$Result = $Result >> 1;
-			$IdNibble = $Result & 0xF;
-			$Result = $Result >> 4;
-
-			$AccountId = ( $AccountId << 4 ) | $IdNibble;
-		}
-
-		return $AccountId;
 	}
 
 	/**
@@ -698,6 +556,26 @@ class SteamID
 	}
 
 	/**
+	 * Sets the account from the given CS:GO friend code (looks like SUCVS-FBAC).
+	 *
+	 * @param string $Value The CS:GO friend code.
+	 *
+	 * @throws InvalidArgumentException
+	 *
+	 * @return SteamID Fluent interface
+	 */
+	public function SetFromCsgoFriendCode( string $Value ) : self
+	{
+		$s = CSGO::SetFromCsgoFriendCode( $Value );
+		$this->SetAccountID( $s->GetAccountID() );
+		$this->SetAccountType( $s->GetAccountType() );
+		$this->SetAccountInstance( $s->GetAccountInstance() );
+		$this->SetAccountUniverse( $s->GetAccountUniverse() );
+
+		return $this;
+	}
+
+	/**
 	 * Sets the account id.
 	 *
 	 * @param int $Value The account id.
@@ -708,7 +586,7 @@ class SteamID
 	{
 		if( $Value < 0 || $Value > 0xFFFFFFFF )
 		{
-			throw new InvalidArgumentException( 'Account id can not be higher than 0xFFFFFFFF.' );
+			throw new \InvalidArgumentException( 'Account id can not be higher than 0xFFFFFFFF.' );
 		}
 
 		$this->ID = $Value;
@@ -727,7 +605,7 @@ class SteamID
 	{
 		if( $Value < 0 || $Value > 0xFFFFF )
 		{
-			throw new InvalidArgumentException( 'Account instance can not be higher than 0xFFFFF.' );
+			throw new \InvalidArgumentException( 'Account instance can not be higher than 0xFFFFF.' );
 		}
 
 		$this->Instance = $Value;
@@ -746,7 +624,7 @@ class SteamID
 	{
 		if( $Value < 0 || $Value > 0xF )
 		{
-			throw new InvalidArgumentException( 'Account type can not be higher than 0xF.' );
+			throw new \InvalidArgumentException( 'Account type can not be higher than 0xF.' );
 		}
 
 		$this->Type = $Value;
@@ -765,7 +643,7 @@ class SteamID
 	{
 		if( $Value < 0 || $Value > 0xFF )
 		{
-			throw new InvalidArgumentException( 'Account universe can not be higher than 0xFF.' );
+			throw new \InvalidArgumentException( 'Account universe can not be higher than 0xFF.' );
 		}
 
 		$this->Universe = $Value;
@@ -784,14 +662,6 @@ class SteamID
 		$this->Type = ( $Value >> 52 ) & 0xF;
 		$this->Instance = ( $Value >> 32 ) & 0xFFFFF;
 		$this->ID = $Value & 0xFFFFFFFF;
-	}
-
-	/**
-	 * Shift the bits of $x by $n steps to the left.
-	 */
-	private static function ShiftLeft( int|string|\GMP $x, int $n ) : \GMP
-	{
-		return gmp_mul( $x, gmp_pow( 2, $n ) );
 	}
 
 	/**
