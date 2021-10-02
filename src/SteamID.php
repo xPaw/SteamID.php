@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace xPaw\SteamID;
+namespace xPaw\Steam;
 
 /**
  * The SteamID library provides an easy way to work with SteamIDs and makes
@@ -346,7 +346,7 @@ class SteamID
 	 */
 	public function RenderCsgoFriendCode() : string
 	{
-		return CSGO::RenderCsgoFriendCode( $this );
+		return CSGOFriendCodes::Render( $this );
 	}
 
 	/**
@@ -566,7 +566,7 @@ class SteamID
 	 */
 	public function SetFromCsgoFriendCode( string $Value ) : self
 	{
-		$s = CSGO::SetFromCsgoFriendCode( $Value );
+		$s = CSGOFriendCodes::SetFromCode( $Value );
 		$this->SetAccountID( $s->GetAccountID() );
 		$this->SetAccountType( $s->GetAccountType() );
 		$this->SetAccountInstance( $s->GetAccountInstance() );

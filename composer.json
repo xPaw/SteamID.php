@@ -23,7 +23,7 @@
 	{
 		"psr-4":
 		{
-			"xPaw\\SteamID\\": "src/"
+			"xPaw\\Steam\\": "src/"
 		}
 	}
 }

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace xPaw\SteamID;
+namespace xPaw\Steam;
 
-class CSGO
+class CSGOFriendCodes
 {
 	/**
 	 * Renders this instance into friend code used by CS:GO.
@@ -16,7 +16,7 @@ class CSGO
 	 *
 	 * @return string A friend code which can be used in CS:GO.
 	 */
-	public static function RenderCsgoFriendCode( SteamID $SteamID ) : string
+	public static function Render( SteamID $SteamID ) : string
 	{
 		$AccountType = $SteamID->GetAccountType();
 
@@ -85,7 +85,7 @@ class CSGO
 	 *
 	 * @return SteamID Fluent interface
 	 */
-	public static function SetFromCsgoFriendCode( string $Value ) : SteamID
+	public static function SetFromCode( string $Value ) : SteamID
 	{
 		$SteamID = new SteamID();
 		$Length = strlen( $Value );
