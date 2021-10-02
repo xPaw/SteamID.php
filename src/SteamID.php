@@ -340,13 +340,13 @@ class SteamID
 	 * Based on <https://github.com/emily33901/go-csfriendcode>
 	 * and looking at CSGO's client.dll.
 	 *
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *
 	 * @return string A friend code which can be used in CS:GO.
 	 */
 	public function RenderCsgoFriendCode() : string
 	{
-		return \xPaw\SteamID\CSGO::RenderCsgoFriendCode( $this );
+		return CSGO::RenderCsgoFriendCode( $this );
 	}
 
 	/**
@@ -560,7 +560,7 @@ class SteamID
 	 *
 	 * @param string $Value The CS:GO friend code.
 	 *
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 *
 	 * @return SteamID Fluent interface
 	 */
