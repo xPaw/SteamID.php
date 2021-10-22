@@ -623,6 +623,11 @@ class SteamID
 		$Value = 'AAAA-' . $Value;
 		$Value = str_replace( '-', '', $Value );
 
+		if( strlen( $Value ) !== 13 )
+		{
+			throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
+		}
+
 		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 		$Result = gmp_init( 0 );
 
@@ -632,7 +637,7 @@ class SteamID
 
 			if( $Character === false )
 			{
-				throw new InvalidArgumentException( 'Given input is malformed.' );
+				throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
 			}
 
 			$Result = gmp_or( $Result, self::ShiftLeft( $Character, 5 * $i ) );

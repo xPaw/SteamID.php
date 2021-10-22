@@ -442,6 +442,24 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$s->SetFromCsgoFriendCode( 'AAAAA-AAAAAAAAAA-AAAA' );
 	}
 
+	public function testInvalidFriendCodeFuzzer1( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID( );
+		$s->SetFromCsgoFriendCode( 'STEAM-AM-A' );
+	}
+
+	public function testInvalidFriendCodeFuzzer2( ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID( );
+		$s->SetFromCsgoFriendCode( '11111-1111' );
+	}
+
 	public function testAccountIdMaxValue( ) : void
 	{
 		$this->expectException( InvalidArgumentException::class );
