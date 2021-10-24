@@ -520,7 +520,13 @@ class SteamID
 			$Value = strtr( (string)$Value, array_flip( self::$SteamInviteDictionary ) );
 			$Value = hexdec( $Value );
 
-			$Value = '[U:1:' . $Value . ']';
+			$NewID = new self();
+			$NewID->SetAccountUniverse( self::UniversePublic );
+			$NewID->SetAccountInstance( self::DesktopInstance );
+			$NewID->SetAccountType( self::TypeIndividual );
+			$NewID->SetAccountID( $Value );
+
+			return $NewID;
 		}
 
 		return new self( $Value );
