@@ -58,6 +58,9 @@ echo $s->RenderSteam2() . PHP_EOL;
 echo $s->ConvertToUInt64() . PHP_EOL;
 ```
 
+Also see [`VanityURLs.php`](/VanityURLs.php) for parsing any user input including URLs.
+If you're going to process user input, `SteamID::SetFromURL()` is all you need to use.
+
 ### SteamID normalization
 
 If you run some website where users can enter their own SteamIDs, sometimes you
@@ -71,7 +74,7 @@ try
 {
 	$s = new SteamID( $ID );
 	
-	if( $s->GetAccountType() !== SteamID :: TypeIndividual )
+	if( $s->GetAccountType() !== SteamID::TypeIndividual )
 	{
 		throw new InvalidArgumentException( 'We only support individual SteamIDs.' );
 	}
@@ -80,8 +83,8 @@ try
 		throw new InvalidArgumentException( 'Invalid SteamID.' );
 	}
 	
-	$s->SetAccountInstance( SteamID :: DesktopInstance );
-	$s->SetAccountUniverse( SteamID :: UniversePublic );
+	$s->SetAccountInstance( SteamID::DesktopInstance );
+	$s->SetAccountUniverse( SteamID::UniversePublic );
 }
 catch( InvalidArgumentException $e )
 {
@@ -132,6 +135,11 @@ After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or
 			<td>ConvertToUInt64</td>
 			<td>-</td>
 			<td>Converts this SteamID into it's 64bit integer form.</td>
+		</tr>
+		<tr>
+			<td>SetFromURL</td>
+			<td>string, callback</td>
+			<td>Parse any user input including URLs and just steam ids.</td>
 		</tr>
 		<tr>
 			<td>SetFromUInt64</td>

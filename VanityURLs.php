@@ -2,16 +2,21 @@
 require __DIR__ . '/SteamID.php';
 
 // Simpler solution which doesn't perform any API requests and simply only works on /profiles/ urls
-$SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/profiles/[U:1:2]', function()
+$SteamID = SteamID::SetFromURL( 'https://steamcommunity.com/profiles/[U:1:2]', function()
 {
 	return null;
 } );
 
+// These also work
+$SteamID = SteamID::SetFromURL( '[U:1:2]', function() { return null; } );
+$SteamID = SteamID::SetFromURL( '76561197960265733', function() { return null; } );
 
+// Lookup vanity urls via Steam web api
 $WebAPIKey = 'YOUR WEBAPI KEY HERE';
 
-$SteamID = SteamID::SetFromURL( 'http://steamcommunity.com/groups/valve', function( string $URL, int $Type ) use ( $WebAPIKey )
+$SteamID = SteamID::SetFromURL( 'https://steamcommunity.com/id/xpaw', function( string $URL, int $Type ) use ( $WebAPIKey )
 {
+	// This callback is only used to resolve vanity urls when required
 	$Parameters =
 	[
 		'format' => 'json',
