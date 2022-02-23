@@ -85,6 +85,9 @@ try
 	
 	$s->SetAccountInstance( SteamID::DesktopInstance );
 	$s->SetAccountUniverse( SteamID::UniversePublic );
+
+	var_dump( $s->RenderSteam3() ); // [U:1:24715681]
+	var_dump( $s->ConvertToUInt64() ); // 76561197984981409
 }
 catch( InvalidArgumentException $e )
 {
@@ -94,6 +97,8 @@ catch( InvalidArgumentException $e )
 
 After doing these steps, you can call `RenderSteam3`, `RenderSteam2` or 
 `ConvertToUInt64` to get normalized SteamID.
+
+See [`Example.php`](/Example.php) for a fully fledged example.
 
 ## Functions
 
