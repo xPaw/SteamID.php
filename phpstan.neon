@@ -4,5 +4,10 @@ parameters:
 	level: 8
 	paths:
 		- .
-	excludes_analyse:
+	excludePaths:
 		- vendor
+	ignoreErrors:
+		-
+			message: "#^Comparison operation \"==\" between GMP and 65536 results in an error\\.$#"
+			count: 2
+			path: SteamID.php

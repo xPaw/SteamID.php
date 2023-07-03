@@ -2,7 +2,7 @@ name: CI
 
 permissions:
   contents: read
-  
+
 on: [push]
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ['8.0', '8.1']
+        php: ['8.0', '8.1', '8.2']
     steps:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -20,6 +20,6 @@ jobs:
     - name: Install dependencies
       run: composer install --no-interaction --no-progress
     - name: Run tests
-      run: php vendor/bin/phpunit --configuration .phpunit.xml --verbose --fail-on-warning
+      run: composer test
     - name: Run phpstan
-      run: php vendor/bin/phpstan analyse
+      run: composer run phpstan

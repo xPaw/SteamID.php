@@ -518,7 +518,7 @@ class SteamID
 			$Value = strtolower( $Matches[ 'id' ] );
 			$Value = preg_replace( '/[^' . implode( '', self::$SteamInviteDictionary ) . ']/', '', $Value );
 			$Value = strtr( (string)$Value, array_flip( self::$SteamInviteDictionary ) );
-			$Value = hexdec( $Value );
+			$Value = (int)hexdec( $Value );
 
 			$NewID = new self();
 			$NewID->SetAccountUniverse( self::UniversePublic );

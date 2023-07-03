@@ -2,7 +2,7 @@
 require __DIR__ . '/SteamID.php';
 
 // This can be any string, like just the steamid, or a link to the profile
-$UserInput = filter_input( INPUT_GET, 'input' );
+$UserInput = (string)filter_input( INPUT_GET, 'input' );
 
 $WebAPIKey = 'YOUR WEBAPI KEY HERE';
 
