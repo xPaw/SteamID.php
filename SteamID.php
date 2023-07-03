@@ -125,9 +125,9 @@ class SteamID
 		}
 
 		// SetFromString
-		if( preg_match( '/^STEAM_([0-4]):([0-1]):(0|[1-9][0-9]{0,9})$/', (string)$Value, $Matches ) === 1 )
+		if( preg_match( '/^STEAM_(?P<universe>[0-4]):(?P<authServer>[0-1]):(?P<id>0|[1-9][0-9]{0,9})$/', (string)$Value, $Matches ) === 1 )
 		{
-			$AccountID = $Matches[ 3 ];
+			$AccountID = $Matches[ 'id' ];
 
 			// Check for max unsigned 32-bit number
 			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
@@ -135,7 +135,7 @@ class SteamID
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
 
-			$Universe = (int)$Matches[ 1 ];
+			$Universe = (int)$Matches[ 'universe' ];
 
 			// Games before orange box used to incorrectly display universe as 0, we support that
 			if( $Universe === self::UniverseInvalid )
@@ -143,7 +143,7 @@ class SteamID
 				$Universe = self::UniversePublic;
 			}
 
-			$AuthServer = (int)$Matches[ 2 ];
+			$AuthServer = (int)$Matches[ 'authServer' ];
 			$AccountID = ( (int)$AccountID << 1 ) | $AuthServer;
 
 			$this->SetAccountUniverse( $Universe );
@@ -152,9 +152,9 @@ class SteamID
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):(0|[1-9][0-9]{0,9})(:([0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
+		else if( preg_match( '/^\\[(?P<type>[AGMPCgcLTIUai]):(?P<universe>[0-4]):(?P<id>0|[1-9][0-9]{0,9})(?:\:(?P<instance>[0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
 		{
-			$AccountID = $Matches[ 3 ];
+			$AccountID = $Matches[ 'id' ];
 
 			// Check for max unsigned 32-bit number
 			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
@@ -162,7 +162,7 @@ class SteamID
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
 
-			$Type = $Matches[ 1 ];
+			$Type = $Matches[ 'type' ];
 
 			if( $Type === 'i' )
 			{
@@ -173,9 +173,9 @@ class SteamID
 			{
 				$InstanceID = self::AllInstances;
 			}
-			else if( isset( $Matches[ 5 ] ) )
+			else if( isset( $Matches[ 'instance' ] ) )
 			{
-				$InstanceID = (int)$Matches[ 5 ];
+				$InstanceID = (int)$Matches[ 'instance' ];
 			}
 			else if( $Type === 'U' )
 			{
@@ -206,7 +206,7 @@ class SteamID
 				$this->SetAccountType( $AccountType );
 			}
 
-			$this->SetAccountUniverse( (int)$Matches[ 2 ] );
+			$this->SetAccountUniverse( (int)$Matches[ 'universe' ] );
 			$this->SetAccountInstance( $InstanceID );
 			$this->SetAccountID( $AccountID );
 		}
