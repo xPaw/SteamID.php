@@ -510,7 +510,7 @@ class SteamID
 
 			if( $Value === null )
 			{
-				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.' );
+				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.', 404 );
 			}
 		}
 		else if( preg_match( '/^https?:\/\/(?:(?:my\.steamchina|steamcommunity)\.com\/user|s\.team\/p)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )

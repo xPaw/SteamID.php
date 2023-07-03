@@ -350,6 +350,17 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 	}
 
+	/**
+	 * @dataProvider notFoundVanityUrlProvider
+	 */
+	public function testSetFromUrlCode404( string $URL ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionCode( 404 );
+
+		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
+	}
+
 	public function testCsgoFriendCodes() : void
 	{
 		$a = new SteamID( '[U:1:12229257]' );
@@ -561,6 +572,14 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ 'http://steamcommunity_com/id/xpaw/' ],
 			[ 'https://steamcommunity,com/profiles/76561210845167618' ],
 			[ 'https://google.com' ],
+		];
+	}
+
+	public function notFoundVanityUrlProvider( ) : array
+	{
+		return
+		[
+			[ 'http://steamcommunity.com/id/surely_not_found/' ],
 		];
 	}
 
