@@ -294,13 +294,15 @@ class SteamID
 	}
 
 	/**
-	 * Renders this instance into Steam's new invite code. Which can be formatted as:
+	 * Renders this instance into Steam's new invite code.
+	 *
+	 * Invites can be formatted as:
 	 * http://s.team/p/%s
 	 * https://steamcommunity.com/user/%s
 	 *
-	 * @throws InvalidArgumentException
-	 *
 	 * @return string A Steam invite code which can be used in a URL.
+	 *
+	 * @throws InvalidArgumentException
 	 */
 	public function RenderSteamInvite() : string
 	{
@@ -335,9 +337,9 @@ class SteamID
 	 * Based on <https://github.com/emily33901/go-csfriendcode>
 	 * and looking at CSGO's client.dll.
 	 *
-	 * @throws InvalidArgumentException
-	 *
 	 * @return string A friend code which can be used in CS:GO.
+	 *
+	 * @throws InvalidArgumentException
 	 */
 	public function RenderCsgoFriendCode() : string
 	{
@@ -466,11 +468,11 @@ class SteamID
 	 * Example implementation is provided in `VanityURLs.php` file.
 	 *
 	 * @param string $Value Input URL
-	 * @param callable $VanityCallback Callback which is called when a vanity lookup is required
-	 *
-	 * @throws InvalidArgumentException
+	 * @param callable(string, int): ?string $VanityCallback Callback which is called when a vanity lookup is required
 	 *
 	 * @return SteamID Fluent interface
+	 *
+	 * @throws InvalidArgumentException
 	 */
 	public static function SetFromURL( string $Value, callable $VanityCallback ) : self
 	{
@@ -537,9 +539,9 @@ class SteamID
 	 *
 	 * @param int|string $Value The 64bit integer to assign this SteamID from.
 	 *
-	 * @throws InvalidArgumentException
-	 *
 	 * @return SteamID Fluent interface
+	 *
+	 * @throws InvalidArgumentException
 	 */
 	public function SetFromUInt64( int|string $Value ) : self
 	{
@@ -571,9 +573,9 @@ class SteamID
 	 *
 	 * @param string $Value The CS:GO friend code.
 	 *
-	 * @throws InvalidArgumentException
-	 *
 	 * @return SteamID Fluent interface
+	 *
+	 * @throws InvalidArgumentException
 	 */
 	public function SetFromCsgoFriendCode( string $Value ) : self
 	{
