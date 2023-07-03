@@ -158,6 +158,9 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->assertEquals( 15, $s->GetAccountType() );
 		$this->assertEquals( 200, $s->GetAccountUniverse() );
 		$this->assertEquals( '[i:200:0]', $s->RenderSteam3() );
+
+		$s = new SteamID( '[U:1:123:0923]' );
+		$this->assertEquals( 923, $s->GetAccountInstance() );
 	}
 
 	public function testSteam3CorrectInvalidParse( ) : void
@@ -546,6 +549,9 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ '[A:1:2(345):]' ],
 			[ 'STEAM_0:6:4491990' ],
 			[ 'STEAM_6:0:4491990' ],
+			[ 'STEAM_1:0:04491990' ],
+			[ '[U:1:009234567]' ],
+			[ '[U:1:01234]' ],
 			[ -1 ],
 		];
 	}

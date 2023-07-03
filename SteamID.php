@@ -125,7 +125,7 @@ class SteamID
 		}
 
 		// SetFromString
-		if( preg_match( '/^STEAM_([0-4]):([0-1]):([0-9]{1,10})$/', (string)$Value, $Matches ) === 1 )
+		if( preg_match( '/^STEAM_([0-4]):([0-1]):(0|[1-9][0-9]{0,9})$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
 
@@ -152,7 +152,7 @@ class SteamID
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):([0-9]{1,10})(:([0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
+		else if( preg_match( '/^\\[([AGMPCgcLTIUai]):([0-4]):(0|[1-9][0-9]{0,9})(:([0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 3 ];
 
