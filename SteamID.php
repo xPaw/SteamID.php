@@ -24,7 +24,7 @@ class SteamID
 	/**
 	 * @var array<int, string> Types of steam account
 	 */
-	private static $AccountTypeChars =
+	private static array $AccountTypeChars =
 	[
 		self::TypeAnonGameServer => 'A',
 		self::TypeGameServer     => 'G',
@@ -41,7 +41,7 @@ class SteamID
 	/**
 	 * @var array<int|string, string> List of replacement hex characters used in /user/ URLs
 	 */
-	private static $SteamInviteDictionary =
+	private static array $SteamInviteDictionary =
 	[
 		'0' => 'b',
 		'1' => 'c',
