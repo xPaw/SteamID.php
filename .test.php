@@ -502,7 +502,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		( new SteamID() )->SetAccountUniverse( 0xFF + 1 );
 	}
 
-	public function steam3StringProvider( ) : array
+	public static function steam3StringProvider( ) : array
 	{
 		return
 		[
@@ -517,7 +517,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function steamId64BitProvider( ) : array
+	public static function steamId64BitProvider( ) : array
 	{
 		return
 		[
@@ -532,7 +532,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function invalidIdProvider( ) : array
+	public static function invalidIdProvider( ) : array
 	{
 		return
 		[
@@ -556,7 +556,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function invalidAccountIdsOverflowProvider( ) : array
+	public static function invalidAccountIdsOverflowProvider( ) : array
 	{
 		return
 		[
@@ -565,7 +565,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function invalidVanityUrlProvider( ) : array
+	public static function invalidVanityUrlProvider( ) : array
 	{
 		return
 		[
@@ -581,7 +581,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function notFoundVanityUrlProvider( ) : array
+	public static function notFoundVanityUrlProvider( ) : array
 	{
 		return
 		[
@@ -589,7 +589,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function vanityUrlProvider( ) : array
+	public static function vanityUrlProvider( ) : array
 	{
 		return
 		[
@@ -617,7 +617,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function inviteUrlProvider( ) : array
+	public static function inviteUrlProvider( ) : array
 	{
 		return
 		[
@@ -631,7 +631,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		];
 	}
 
-	public function fakeResolveVanityURL( string $URL, int $Type ) : ?string
+	public static function fakeResolveVanityURL( string $URL, int $Type ) : ?string
 	{
 		$FakeValues =
 		[
