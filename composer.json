@@ -27,9 +27,9 @@
 	},
 	"autoload":
 	{
-		"files":
-		[
-			"SteamID.php"
-		]
+		"psr-4":
+		{
+			"xPaw\\SteamID\\": "src/"
+		}
 	}
 }

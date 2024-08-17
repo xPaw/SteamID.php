@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+namespace xPaw\SteamID;
+
+use \InvalidArgumentException;
+
 /**
  * The SteamID library provides an easy way to work with SteamIDs and makes
  * conversions easy. Ported from SteamKit.

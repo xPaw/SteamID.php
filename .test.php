@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use xPaw\SteamID\SteamID;
+
 class SteamIDFacts extends PHPUnit\Framework\TestCase
 {
 	public function testEmptyConstructorInvalid( ) : void

@@ -1,5 +1,8 @@
 <?php
-require __DIR__ . '/SteamID.php';
+
+use xPaw\SteamID\SteamID;
+
+require __DIR__ . '/vendor/autoload.php';
 
 // This can be any string, like just the steamid, or a link to the profile
 $UserInput = (string)filter_input( INPUT_GET, 'input' );
