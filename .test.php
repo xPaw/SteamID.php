@@ -413,6 +413,15 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->assertEquals( '[g:1:4777282]', $a->RenderSteam3() );
 	}
 
+	public function testNotIndividualCsgoFriendCodes() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'This can only be used on Individual SteamID.' );
+
+		$s = new SteamID( '[g:1:4777282]' );
+		$s->RenderCsgoFriendCode();
+	}
+
 	public function testInvalidFriendCodeLength( ) : void
 	{
 		$this->expectException( InvalidArgumentException::class );
