@@ -1,4 +1,4 @@
-# SteamID.php [![Packagist](https://img.shields.io/packagist/dt/xpaw/steamid.svg)](https://packagist.org/packages/xpaw/steamid)
+# SteamID.php [![Packagist](https://img.shields.io/packagist/dt/xpaw/steamid.svg)](https://packagist.org/packages/xpaw/steamid) [![Codecov](https://codecov.io/gh/xPaw/SteamID.php/graph/badge.svg?token=MykhdiNWe2)](https://codecov.io/gh/xPaw/SteamID.php)
 
 This 64bit structure is used for identifying various objects on the Steam 
 network. This library provides an easy way to work with SteamIDs and makes 

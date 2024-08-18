@@ -2,7 +2,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" cacheResult="false" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd">
   <coverage>
     <report>
-      <clover outputFile="build/logs/clover.xml"/>
+      <clover outputFile="coverage.xml"/>
     </report>
   </coverage>
   <testsuites>
