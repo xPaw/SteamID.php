@@ -23,7 +23,7 @@ use \InvalidArgumentException;
  * @author xPaw
  * @license MIT
  */
-class SteamID
+class SteamID implements \Stringable
 {
 	/**
 	 * @var array<int, string> Types of steam account
