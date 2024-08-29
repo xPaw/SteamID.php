@@ -13,7 +13,7 @@ try
 {
 	// SetFromURL does all the heavy lifing of parsing the input
 	// This callback is only called to resolve vanity urls when required
-	$SteamID = SteamID::SetFromURL( $UserInput, function( string $URL, int $Type ) use ( $WebAPIKey )
+	$SteamID = SteamID::SetFromURL( $UserInput, function( string $URL, int $Type ) use ( $WebAPIKey ) : ?string
 	{
 		$Parameters =
 		[
@@ -35,12 +35,9 @@ try
 		] );
 
 		$Response = curl_exec( $c );
-
-		curl_close( $c );
-
 		$Response = json_decode( (string)$Response, true );
 
-		if( isset( $Response[ 'response' ][ 'success' ] ) )
+		if( is_array( $Response ) && isset( $Response[ 'response' ][ 'success' ] ) )
 		{
 			switch( (int)$Response[ 'response' ][ 'success' ] )
 			{

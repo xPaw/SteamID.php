@@ -366,7 +366,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
 	}
 
-	public function testCsgoFriendCodes() : void
+	public function testRenderCsgoFriendCodes() : void
 	{
 		$a = new SteamID( '[U:1:12229257]' );
 		$this->assertEquals( 'ALQF4-BYCA', $a->RenderCsgoFriendCode() );
@@ -388,7 +388,10 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 
 		$a = new SteamID( '[I:4:12229257:1048575]' );
 		$this->assertEquals( 'ALQF4-BYCA', $a->RenderCsgoFriendCode() );
+	}
 
+	public function testSetFromCsgoFriendCodes() : void
+	{
 		$a = ( new SteamID() )->SetFromCsgoFriendCode( 'ALQF4-BYCA' );
 		$this->assertEquals( '[U:1:12229257]', $a->RenderSteam3() );
 

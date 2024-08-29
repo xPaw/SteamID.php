@@ -266,11 +266,11 @@ class SteamID
 		{
 			case self::TypeChat:
 			{
-				if( $AccountInstance & self::InstanceFlagClan )
+				if( ( $AccountInstance & self::InstanceFlagClan ) !== 0 )
 				{
 					$AccountTypeChar = 'c';
 				}
-				else if( $AccountInstance & self::InstanceFlagLobby )
+				else if( ( $AccountInstance & self::InstanceFlagLobby ) !== 0 )
 				{
 					$AccountTypeChar = 'L';
 				}
@@ -609,8 +609,8 @@ class SteamID
 			) );
 
 			$IsGroup =
-				gmp_and( $Left, '0xFFFF0000' ) == 0x10000 &&
-				gmp_and( $Right, '0xFFFF0000' ) == 0x10000;
+				gmp_cmp( gmp_and( $Left, '0xFFFF0000' ), 0x10000 ) === 0 &&
+				gmp_cmp( gmp_and( $Right, '0xFFFF0000' ), 0x10000 ) === 0;
 
 			$this->SetAccountID( $AccountId );
 			$this->SetAccountType( $IsGroup ? self::TypeClan : self::TypeIndividual );

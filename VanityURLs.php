@@ -17,7 +17,7 @@ $SteamID = SteamID::SetFromURL( '76561197960265733', function() { return null; }
 // Lookup vanity urls via Steam web api
 $WebAPIKey = 'YOUR WEBAPI KEY HERE';
 
-$SteamID = SteamID::SetFromURL( 'https://steamcommunity.com/id/xpaw', function( string $URL, int $Type ) use ( $WebAPIKey )
+$SteamID = SteamID::SetFromURL( 'https://steamcommunity.com/id/xpaw', function( string $URL, int $Type ) use ( $WebAPIKey ) : ?string
 {
 	// This callback is only used to resolve vanity urls when required
 	$Parameters =
@@ -40,12 +40,9 @@ $SteamID = SteamID::SetFromURL( 'https://steamcommunity.com/id/xpaw', function( 
 	] );
 
 	$Response = curl_exec( $c );
-
-	curl_close( $c );
-
 	$Response = json_decode( (string)$Response, true );
 
-	if( isset( $Response[ 'response' ][ 'success' ] ) )
+	if( is_array( $Response ) && isset( $Response[ 'response' ][ 'success' ] ) )
 	{
 		switch( (int)$Response[ 'response' ][ 'success' ] )
 		{

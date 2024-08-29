@@ -1,13 +1,8 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
 parameters:
-	checkMissingIterableValueType: true
-	checkFunctionNameCase: true
-	level: 8
+	level: max
 	paths:
 		- .
 	excludePaths:
 		- vendor
-	ignoreErrors:
-		-
-			message: "#^Comparison operation \"==\" between GMP and 65536 results in an error\\.$#"
-			count: 2
-			path: src/SteamID.php
