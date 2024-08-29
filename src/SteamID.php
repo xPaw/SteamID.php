@@ -505,12 +505,12 @@ class SteamID
 				}
 			}
 
-			switch( $Matches[ 'type' ] )
+			$VanityType = match( $Matches[ 'type' ] )
 			{
-				case 'groups': $VanityType = self::VanityGroup; break;
-				case 'games' : $VanityType = self::VanityGameGroup; break;
-				default      : $VanityType = self::VanityIndividual;
-			}
+				'groups' => self::VanityGroup,
+				'games' => self::VanityGameGroup,
+				default => self::VanityIndividual,
+			};
 
 			$Value = call_user_func( $VanityCallback, $Matches[ 'id' ], $VanityType );
 
