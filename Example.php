@@ -1,6 +1,6 @@
 <?php
 
-use xPaw\SteamID\SteamID;
+use xPaw\Steam\SteamID;
 
 require __DIR__ . '/vendor/autoload.php';
 

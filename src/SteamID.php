@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace xPaw\SteamID;
+namespace xPaw\Steam;
 
 use \InvalidArgumentException;
 

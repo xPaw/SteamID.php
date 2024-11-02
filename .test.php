@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-use xPaw\SteamID\SteamID;
+use xPaw\Steam\SteamID;
 
 class SteamIDFacts extends PHPUnit\Framework\TestCase
 {

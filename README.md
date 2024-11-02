@@ -38,6 +38,8 @@ multiple examples on how to manipulate SteamIDs.
 ### Example
 
 ```php
+use xPaw\Steam\SteamID;
+
 try
 {
 	// Constructor also accepts Steam3 and Steam2 representations
@@ -70,6 +72,8 @@ can manipulate given SteamID and set universe to public and instance to
 desktop.
 
 ```php
+use xPaw\Steam\SteamID;
+
 try
 {
 	$s = new SteamID( $ID );
