@@ -425,6 +425,15 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$s->RenderCsgoFriendCode();
 	}
 
+	public function testInvalidCsgoFriendCodeCharacters() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		$s = new SteamID();
+		$s->SetFromCsgoFriendCode( 'AAAAA-ZZZZZ' );
+	}
+
 	public function testInvalidFriendCodeLength( ) : void
 	{
 		$this->expectException( InvalidArgumentException::class );
@@ -514,6 +523,182 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->expectException( InvalidArgumentException::class );
 
 		( new SteamID() )->SetAccountUniverse( 0xFF + 1 );
+	}
+
+	public function testMaxValidAccountId() : void
+	{
+		$s = new SteamID();
+		$s->SetAccountID(4294967295);
+		$this->assertEquals(4294967295, $s->GetAccountID());
+
+		$s = new SteamID('STEAM_1:1:2147483647');
+		$this->assertEquals(4294967295, $s->GetAccountID());
+
+		$s = new SteamID('[U:1:4294967295]');
+		$this->assertEquals(4294967295, $s->GetAccountID());
+	}
+
+	public function testNegativeAccountParameters() : void
+	{
+		$this->expectException(InvalidArgumentException::class);
+
+		$s = new SteamID();
+		$s->SetAccountID(-1);
+	}
+
+	public function testSetFromURLWithQueryParameters() : void
+	{
+		$s = SteamID::SetFromURL('https://steamcommunity.com/id/xpaw/?l=english', [$this, 'fakeResolveVanityURL']);
+		$this->assertEquals('76561197972494985', $s->ConvertToUInt64());
+	}
+
+	public function testSetFromURLWithSubpages() : void
+	{
+		$s = SteamID::SetFromURL('https://steamcommunity.com/id/xpaw/screenshots/', [$this, 'fakeResolveVanityURL']);
+		$this->assertEquals('76561197972494985', $s->ConvertToUInt64());
+	}
+
+	public function testCsgoFriendCodeRoundTrip() : void
+	{
+		$original = new SteamID('[U:1:12229257]');
+		$friendCode = $original->RenderCsgoFriendCode();
+		$reconstructed = (new SteamID())->SetFromCsgoFriendCode($friendCode);
+
+		$this->assertEquals($original->ConvertToUInt64(), $reconstructed->ConvertToUInt64());
+	}
+
+	public function testSteamInviteRoundTrip() : void
+	{
+		$originalId = 12229257;
+		$original = new SteamID();
+		$original->SetAccountType(SteamID::TypeIndividual);
+		$original->SetAccountUniverse(SteamID::UniversePublic);
+		$original->SetAccountInstance(SteamID::DesktopInstance);
+		$original->SetAccountID($originalId);
+
+		$invite = $original->RenderSteamInvite();
+		$result = SteamID::SetFromURL('https://s.team/p/' . $invite, [$this, 'fakeResolveVanityURL']);
+
+		$this->assertEquals($originalId, $result->GetAccountID());
+	}
+
+	public function testAllChatInstanceFlags() : void
+	{
+		// Test Clan chat
+		$s = new SteamID();
+		$s->SetAccountType(SteamID::TypeChat);
+		$s->SetAccountInstance(SteamID::InstanceFlagClan);
+		$s->SetAccountID(123);
+		$s->SetAccountUniverse(SteamID::UniversePublic);
+
+		$this->assertEquals('[c:1:123]', $s->RenderSteam3());
+
+		// Test Lobby chat
+		$s = new SteamID();
+		$s->SetAccountType(SteamID::TypeChat);
+		$s->SetAccountInstance(SteamID::InstanceFlagLobby);
+		$s->SetAccountID(123);
+		$s->SetAccountUniverse(SteamID::UniversePublic);
+
+		$this->assertEquals('[L:1:123]', $s->RenderSteam3());
+
+		// Test MMS Lobby chat
+		$s = new SteamID();
+		$s->SetAccountType(SteamID::TypeChat);
+		$s->SetAccountInstance(SteamID::InstanceFlagMMSLobby);
+		$s->SetAccountID(123);
+		$s->SetAccountUniverse(SteamID::UniversePublic);
+
+		// Note: This tests that the MMSLobby flag is preserved but doesn't have a special render mode
+		$this->assertEquals('[T:1:123]', $s->RenderSteam3());
+	}
+
+	public function testDefaultValues() : void
+	{
+		$s = new SteamID();
+
+		$this->assertEquals(0, $s->GetAccountID());
+		$this->assertEquals(0, $s->GetAccountInstance());
+		$this->assertEquals(0, $s->GetAccountType());
+		$this->assertEquals(0, $s->GetAccountUniverse());
+		$this->assertEquals('0', $s->ConvertToUInt64());
+	}
+
+	public function testSpecificAccountTypeValidations() : void
+	{
+		// Individual type requires non-zero ID and valid instance
+		$s = new SteamID();
+		$s->SetAccountType(SteamID::TypeIndividual);
+		$s->SetAccountUniverse(SteamID::UniversePublic);
+		$s->SetAccountID(0);
+		$this->assertFalse($s->IsValid());
+
+		$s->SetAccountID(1);
+		$s->SetAccountInstance(SteamID::WebInstance);
+		$this->assertTrue($s->IsValid());
+
+		$s->SetAccountInstance(5); // Invalid instance
+		$this->assertFalse($s->IsValid());
+
+		// Clan type requires non-zero ID and instance 0
+		$s = new SteamID();
+		$s->SetAccountType(SteamID::TypeClan);
+		$s->SetAccountUniverse(SteamID::UniversePublic);
+		$s->SetAccountID(1);
+		$s->SetAccountInstance(0);
+		$this->assertTrue($s->IsValid());
+
+		$s->SetAccountInstance(1);
+		$this->assertFalse($s->IsValid());
+
+		$s->SetAccountInstance(0);
+		$s->SetAccountID(0);
+		$this->assertFalse($s->IsValid());
+
+		// GameServer type requires non-zero ID
+		$s = new SteamID();
+		$s->SetAccountType(SteamID::TypeGameServer);
+		$s->SetAccountUniverse(SteamID::UniversePublic);
+		$s->SetAccountID(0);
+		$this->assertFalse($s->IsValid());
+
+		$s->SetAccountID(1);
+		$this->assertTrue($s->IsValid());
+	}
+
+	public function testStringValidation() : void
+	{
+		$longString = str_repeat('a', 1000);
+
+		$this->expectException(InvalidArgumentException::class);
+		new SteamID($longString);
+	}
+
+	public function testSequentialOperations() : void
+	{
+		$s = new SteamID();
+
+		// Start with a valid ID
+		$s->SetAccountType(SteamID::TypeIndividual);
+		$s->SetAccountUniverse(SteamID::UniversePublic);
+		$s->SetAccountID(123);
+		$s->SetAccountInstance(SteamID::DesktopInstance);
+
+		$this->assertTrue($s->IsValid());
+		$this->assertEquals('[U:1:123]', $s->RenderSteam3());
+
+		// Change to clan
+		$s->SetAccountType(SteamID::TypeClan);
+		$s->SetAccountInstance(0); // Clan requires instance 0
+
+		$this->assertTrue($s->IsValid());
+		$this->assertEquals('[g:1:123]', $s->RenderSteam3());
+
+		// Change universe
+		$s->SetAccountUniverse(SteamID::UniverseBeta);
+
+		$this->assertTrue($s->IsValid());
+		$this->assertEquals('[g:2:123]', $s->RenderSteam3());
 	}
 
 	public static function steam3StringProvider( ) : array

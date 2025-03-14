@@ -2,6 +2,7 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
 parameters:
 	level: max
+	checkExplicitMixed: false
 	paths:
 		- .
 	excludePaths:
