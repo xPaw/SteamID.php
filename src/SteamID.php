@@ -28,7 +28,7 @@ class SteamID implements \Stringable
 	/**
 	 * @var array<int, string> Types of steam account
 	 */
-	private static array $AccountTypeChars =
+	private const array AccountTypeChars =
 	[
 		self::TypeAnonGameServer => 'A',
 		self::TypeGameServer     => 'G',
@@ -45,7 +45,7 @@ class SteamID implements \Stringable
 	/**
 	 * @var array<int|string, string> List of replacement hex characters used in /user/ URLs
 	 */
-	private static array $SteamInviteDictionary =
+	private const array SteamInviteDictionary =
 	[
 		'0' => 'b',
 		'1' => 'c',
@@ -205,7 +205,7 @@ class SteamID implements \Stringable
 			else
 			{
 				/** @var int $AccountType */
-				$AccountType = array_search( $Type, self::$AccountTypeChars, true );
+				$AccountType = array_search( $Type, self::AccountTypeChars, true );
 
 				$this->SetAccountType( $AccountType );
 			}
@@ -226,6 +226,8 @@ class SteamID implements \Stringable
 
 	/**
 	 * Renders this instance into it's Steam2 "STEAM_" representation.
+	 *
+	 * @pure
 	 *
 	 * @return string A string Steam2 "STEAM_" representation of this SteamID.
 	 */
@@ -252,13 +254,15 @@ class SteamID implements \Stringable
 	/**
 	 * Renders this instance into its Steam3 representation.
 	 *
+	 * @pure
+	 *
 	 * @return string A string Steam3 representation of this SteamID.
 	 */
 	public function RenderSteam3() : string
 	{
 		$AccountInstance = $this->GetAccountInstance();
 		$AccountType = $this->GetAccountType();
-		$AccountTypeChar = self::$AccountTypeChars[ $AccountType ] ?? 'i';
+		$AccountTypeChar = self::AccountTypeChars[ $AccountType ] ?? 'i';
 
 		$RenderInstance = false;
 
@@ -306,6 +310,8 @@ class SteamID implements \Stringable
 	 *
 	 * @return string A Steam invite code which can be used in a URL.
 	 *
+	 * @pure
+	 *
 	 * @throws InvalidArgumentException
 	 */
 	public function RenderSteamInvite() : string
@@ -316,7 +322,7 @@ class SteamID implements \Stringable
 			case self::TypeIndividual:
 			{
 				$Code = dechex( $this->GetAccountID() );
-				$Code = strtr( $Code, self::$SteamInviteDictionary );
+				$Code = strtr( $Code, self::SteamInviteDictionary );
 				$Length = strlen( $Code );
 
 				// TODO: We don't know when Valve starts inserting the dash
@@ -342,6 +348,8 @@ class SteamID implements \Stringable
 	 * and looking at CSGO's client.dll.
 	 *
 	 * @return string A friend code which can be used in CS:GO.
+	 *
+	 * @pure
 	 *
 	 * @throws InvalidArgumentException
 	 */
@@ -406,6 +414,8 @@ class SteamID implements \Stringable
 
 	/**
 	 * Gets a value indicating whether this instance is valid.
+	 *
+	 * @pure
 	 *
 	 * @return bool true if this instance is valid; otherwise, false.
 	 */
@@ -522,8 +532,8 @@ class SteamID implements \Stringable
 		else if( preg_match( '/^https?:\/\/(?:(?:my\.steamchina|steamcommunity)\.com\/user|s\.team\/p)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
 			$Value = strtolower( $Matches[ 'id' ] );
-			$Value = preg_replace( '/[^' . implode( '', self::$SteamInviteDictionary ) . ']/', '', $Value );
-			$Value = strtr( (string)$Value, array_flip( self::$SteamInviteDictionary ) );
+			$Value = preg_replace( '/[^' . implode( '', self::SteamInviteDictionary ) . ']/', '', $Value );
+			$Value = strtr( (string)$Value, array_flip( self::SteamInviteDictionary ) );
 			$Value = (int)hexdec( $Value );
 
 			$NewID = new self();
@@ -564,6 +574,8 @@ class SteamID implements \Stringable
 	/**
 	 * Converts this SteamID into it's 64bit integer form. This function returns
 	 * as a string to work on 32-bit PHP systems.
+	 *
+	 * @pure
 	 *
 	 * @return string A 64bit integer representing this SteamID.
 	 */
@@ -674,6 +686,8 @@ class SteamID implements \Stringable
 	/**
 	 * Gets the account id.
 	 *
+	 * @pure
+	 *
 	 * @return int The account id.
 	 */
 	public function GetAccountID() : int
@@ -683,6 +697,8 @@ class SteamID implements \Stringable
 
 	/**
 	 * Gets the account instance.
+	 *
+	 * @pure
 	 *
 	 * @return int The account instance.
 	 */
@@ -694,6 +710,8 @@ class SteamID implements \Stringable
 	/**
 	 * Gets the account type.
 	 *
+	 * @pure
+	 *
 	 * @return int The account type.
 	 */
 	public function GetAccountType() : int
@@ -703,6 +721,8 @@ class SteamID implements \Stringable
 
 	/**
 	 * Gets the account universe.
+	 *
+	 * @pure
 	 *
 	 * @return int The account universe.
 	 */
@@ -787,6 +807,9 @@ class SteamID implements \Stringable
 		return $this;
 	}
 
+	/**
+	 * @pure
+	 */
 	private function Get( int $BitOffset, int|string $ValueMask ) : \GMP
 	{
 		return gmp_and( self::ShiftRight( $this->Data, $BitOffset ), $ValueMask );
@@ -801,6 +824,8 @@ class SteamID implements \Stringable
 	}
 
 	/**
+	 * @pure
+	 *
 	 * Shift the bits of $x by $n steps to the left.
 	 */
 	private static function ShiftLeft( int|string|\GMP $x, int $n ) : \GMP
@@ -809,6 +834,8 @@ class SteamID implements \Stringable
 	}
 
 	/**
+	 * @pure
+	 *
 	 * Shift the bits of $x by $n steps to the right.
 	 */
 	private static function ShiftRight( int|string|\GMP $x, int $n ) : \GMP
@@ -829,6 +856,7 @@ class SteamID implements \Stringable
 		return preg_match( '/^[1-9][0-9]{0,19}$/', $n ) === 1;
 	}
 
+	#[\Override]
 	public function __toString() : string
 	{
 		return $this->ConvertToUInt64();
