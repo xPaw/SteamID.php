@@ -701,6 +701,44 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->assertEquals('[g:2:123]', $s->RenderSteam3());
 	}
 
+	public function testFromAccountIDOutOfRangeNegative() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+
+		SteamID::FromAccountID( -1 );
+	}
+
+	public function testFromAccountIDOutOfRange() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+
+		SteamID::FromAccountID( 0xFFFFFFFF + 1 );
+	}
+
+	public function testAccountIDToUInt64() : void
+	{
+		$result = SteamID::AccountIDToUInt64( 123 );
+		$this->assertEquals( '76561197960265851', $result );
+	}
+
+	public function testAccountIDRender() : void
+	{
+		$result = SteamID::AccountIDRender( 123 );
+		$this->assertEquals( '[U:1:123]', $result );
+	}
+
+	public function testStaticMethodsConsistency() : void
+	{
+		$accountId = 4491990;
+
+		$fromStatic = SteamID::FromAccountID( $accountId );
+		$uint64 = SteamID::AccountIDToUInt64( $accountId );
+		$steam3 = SteamID::AccountIDRender( $accountId );
+
+		$this->assertEquals( $fromStatic->ConvertToUInt64(), $uint64 );
+		$this->assertEquals( $fromStatic->RenderSteam3(), $steam3 );
+	}
+
 	public static function steam3StringProvider( ) : array
 	{
 		return

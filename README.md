@@ -161,6 +161,21 @@ See [`Example.php`](/Example.php) for a fully fledged example.
 			<td>Sets the accountid of this SteamID from a CS:GO friend code. Resets other components to default values.</td>
 		</tr>
 		<tr>
+			<td>FromAccountID</td>
+			<td>int</td>
+			<td>Static method. Constructs an individual SteamID in public universe with desktop instance from an account ID.</td>
+		</tr>
+		<tr>
+			<td>AccountIDToUInt64</td>
+			<td>int</td>
+			<td>Static method. Converts an account ID to a 64bit SteamID string.</td>
+		</tr>
+		<tr>
+			<td>AccountIDRender</td>
+			<td>int</td>
+			<td>Static method. Renders an account ID as Steam3 representation.</td>
+		</tr>
+		<tr>
 			<td>GetAccountID</td>
 			<td>-</td>
 			<td>Gets the account id.</td>

@@ -829,6 +829,34 @@ class SteamID implements \Stringable
 		return preg_match( '/^[1-9][0-9]{0,19}$/', $n ) === 1;
 	}
 
+	/**
+	 * Static method to construct a SteamID and call ConvertToUInt64 on it.
+	 */
+	public static function AccountIDToUInt64( int $AccountID ) : string
+	{
+		return self::FromAccountID( $AccountID )->ConvertToUInt64();
+	}
+
+	/**
+	 * Static method to construct a SteamID and call RenderSteam3 on it.
+	 */
+	public static function AccountIDRender( int $AccountID ) : string
+	{
+		return self::FromAccountID( $AccountID )->RenderSteam3();
+	}
+
+	/**
+	 * Construct an individual SteamID in public universe given an account id.
+	 */
+	public static function FromAccountID( int $AccountID ) : self
+	{
+		return new self()
+			->SetAccountID( $AccountID )
+			->SetAccountUniverse( SteamID::UniversePublic )
+			->SetAccountInstance( SteamID::DesktopInstance )
+			->SetAccountType( SteamID::TypeIndividual );
+	}
+
 	public function __toString() : string
 	{
 		return $this->ConvertToUInt64();
