@@ -723,7 +723,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 
 	public function testAccountIDRender() : void
 	{
-		$result = SteamID::AccountIDRender( 123 );
+		$result = SteamID::RenderAccountID( 123 );
 		$this->assertEquals( '[U:1:123]', $result );
 	}
 
@@ -733,7 +733,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 
 		$fromStatic = SteamID::FromAccountID( $accountId );
 		$uint64 = SteamID::AccountIDToUInt64( $accountId );
-		$steam3 = SteamID::AccountIDRender( $accountId );
+		$steam3 = SteamID::RenderAccountID( $accountId );
 
 		$this->assertEquals( $fromStatic->ConvertToUInt64(), $uint64 );
 		$this->assertEquals( $fromStatic->RenderSteam3(), $steam3 );

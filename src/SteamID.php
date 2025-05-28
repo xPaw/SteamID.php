@@ -840,7 +840,7 @@ class SteamID implements \Stringable
 	/**
 	 * Static method to construct a SteamID and call RenderSteam3 on it.
 	 */
-	public static function AccountIDRender( int $AccountID ) : string
+	public static function RenderAccountID( int $AccountID ) : string
 	{
 		return self::FromAccountID( $AccountID )->RenderSteam3();
 	}

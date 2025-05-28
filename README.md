@@ -77,7 +77,7 @@ echo $steamId->RenderSteam3(); // [U:1:24715681]
 echo SteamID::AccountIDToUInt64( $accountId ); // 76561197984981409
 
 // Quick conversion to Steam3 format
-echo SteamID::AccountIDRender( $accountId ); // [U:1:24715681]
+echo SteamID::RenderAccountID( $accountId ); // [U:1:24715681]
 ```
 
 ### Parsing user input
@@ -175,7 +175,7 @@ See [`Example.php`](/Example.php) for a fully fledged example.
 | `SetAccountUniverse` | int | Sets the account universe. (e.g. `SteamID::UniversePublic`) |
 | `FromAccountID` | int | **Static method.** Constructs an individual SteamID in public universe with desktop instance from an account ID. |
 | `AccountIDToUInt64` | int | **Static method.** Converts an account ID to a 64bit SteamID string. |
-| `AccountIDRender` | int | **Static method.** Renders an account ID as Steam3 representation. |
+| `RenderAccountID` | int | **Static method.** Renders an account ID as Steam3 representation. |
 
 ## Counter-Strike Friend Codes
 
