@@ -850,7 +850,9 @@ class SteamID implements \Stringable
 	 */
 	public static function FromAccountID( int $AccountID ) : self
 	{
-		return new self()
+		$s = new self();
+
+		return $s
 			->SetAccountID( $AccountID )
 			->SetAccountUniverse( SteamID::UniversePublic )
 			->SetAccountInstance( SteamID::DesktopInstance )
