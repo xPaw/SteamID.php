@@ -44,24 +44,72 @@ try
 {
 	// Constructor also accepts Steam3 and Steam2 representations
 	$s = new SteamID( '76561197984981409' );
+	
+	// Renders SteamID in it's Steam3 representation (e.g. [U:1:24715681])
+	echo $s->RenderSteam3() . PHP_EOL;
+	
+	// Renders SteamID in it's Steam2 representation (e.g. STEAM_0:1:12357840)
+	echo $s->RenderSteam2() . PHP_EOL;
+	
+	// Converts this SteamID into it's 64bit integer form (e.g. 76561197984981409)
+	echo $s->ConvertToUInt64() . PHP_EOL;
 }
 catch( InvalidArgumentException $e )
 {
-	echo 'Given SteamID could not be parsed.';
+	echo 'Given SteamID could not be parsed: ' . $e->getMessage();
 }
-
-// Renders SteamID in it's Steam3 representation (e.g. [U:1:24715681])
-echo $s->RenderSteam3() . PHP_EOL;
-
-// Renders SteamID in it's Steam2 representation (e.g. STEAM_0:1:12357840)
-echo $s->RenderSteam2() . PHP_EOL;
-
-// Converts this SteamID into it's 64bit integer form (e.g. 76561197984981409)
-echo $s->ConvertToUInt64() . PHP_EOL;
 ```
+
+### Static helper methods
+
+For quick conversions when you only have an account ID:
+
+```php
+use xPaw\Steam\SteamID;
+
+$accountId = 24715681;
+
+// Create a standard individual SteamID from account ID
+$steamId = SteamID::FromAccountID( $accountId );
+echo $steamId->RenderSteam3(); // [U:1:24715681]
+
+// Quick conversion to 64-bit format
+echo SteamID::AccountIDToUInt64( $accountId ); // 76561197984981409
+
+// Quick conversion to Steam3 format
+echo SteamID::AccountIDRender( $accountId ); // [U:1:24715681]
+```
+
+### Parsing user input
 
 Also see [`VanityURLs.php`](/VanityURLs.php) for parsing any user input including URLs.
 If you're going to process user input, `SteamID::SetFromURL()` is all you need to use.
+
+```php
+use xPaw\Steam\SteamID;
+
+// Supports various URL formats and direct SteamIDs
+$inputs = [
+	'https://steamcommunity.com/id/username/',
+	'https://steamcommunity.com/profiles/76561197984981409',
+	'https://s.team/p/abc-def',
+	'76561197984981409',
+	'[U:1:24715681]'
+];
+
+foreach( $inputs as $input )
+{
+	try
+	{
+		$steamId = SteamID::SetFromURL( $input, 'yourVanityResolverCallback' );
+		echo $steamId->ConvertToUInt64() . PHP_EOL;
+	}
+	catch( InvalidArgumentException $e )
+	{
+		echo "Could not parse: $input" . PHP_EOL;
+	}
+}
+```
 
 ### SteamID normalization
 
@@ -106,144 +154,61 @@ See [`Example.php`](/Example.php) for a fully fledged example.
 
 ## Functions
 
-<table>
-	<thead>
-		<tr>
-			<th>Name</th>
-			<th>Parameters</th>
-			<th>Description</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td>IsValid</td>
-			<td>-</td>
-			<td>Gets a value indicating whether this instance is valid.</td>
-		</tr>
-		<tr>
-			<td>RenderSteam2</td>
-			<td>-</td>
-			<td>Renders this instance into it's Steam2 "STEAM_" representation.</td>
-		</tr>
-		<tr>
-			<td>RenderSteam3</td>
-			<td>-</td>
-			<td>Renders this instance into it's Steam3 representation.</td>
-		</tr>
-		<tr>
-			<td>RenderSteamInvite</td>
-			<td>-</td>
-			<td>Encodes accountid as HEX which can be used in `http://s.team/p/` URL.</td>
-		</tr>
-		<tr>
-			<td>RenderCsgoFriendCode</td>
-			<td>-</td>
-			<td>Encodes accountid as CS:GO friend code.</td>
-		</tr>
-		<tr>
-			<td>ConvertToUInt64</td>
-			<td>-</td>
-			<td>Converts this SteamID into it's 64bit integer form.</td>
-		</tr>
-		<tr>
-			<td>SetFromURL</td>
-			<td>string, callback</td>
-			<td>Parse any user input including URLs and just steam ids.</td>
-		</tr>
-		<tr>
-			<td>SetFromUInt64</td>
-			<td>string or int (e.g 765...)</td>
-			<td>Sets the various components of this SteamID from a 64bit integer form.</td>
-		</tr>
-		<tr>
-			<td>SetFromCsgoFriendCode</td>
-			<td>string</td>
-			<td>Sets the accountid of this SteamID from a CS:GO friend code. Resets other components to default values.</td>
-		</tr>
-		<tr>
-			<td>FromAccountID</td>
-			<td>int</td>
-			<td>Static method. Constructs an individual SteamID in public universe with desktop instance from an account ID.</td>
-		</tr>
-		<tr>
-			<td>AccountIDToUInt64</td>
-			<td>int</td>
-			<td>Static method. Converts an account ID to a 64bit SteamID string.</td>
-		</tr>
-		<tr>
-			<td>AccountIDRender</td>
-			<td>int</td>
-			<td>Static method. Renders an account ID as Steam3 representation.</td>
-		</tr>
-		<tr>
-			<td>GetAccountID</td>
-			<td>-</td>
-			<td>Gets the account id.</td>
-		</tr>
-		<tr>
-			<td>GetAccountInstance</td>
-			<td>-</td>
-			<td>Gets the account instance.</td>
-		</tr>
-		<tr>
-			<td>GetAccountType</td>
-			<td>-</td>
-			<td>Gets the account type.</td>
-		</tr>
-		<tr>
-			<td>GetAccountUniverse</td>
-			<td>-</td>
-			<td>Gets the account universe.</td>
-		</tr>
-		<tr>
-			<td>SetAccountID</td>
-			<td>New account id</td>
-			<td>Sets the account id.</td>
-		</tr>
-		<tr>
-			<td>SetAccountInstance</td>
-			<td>New account instance</td>
-			<td>Sets the account instance. (e.g. <code>SteamID::DesktopInstance</code>)</td>
-		</tr>
-		<tr>
-			<td>SetAccountType</td>
-			<td>New account type</td>
-			<td>Sets the account type. (e.g. <code>SteamID::TypeAnonGameServer</code>)</td>
-		</tr>
-		<tr>
-			<td>SetAccountUniverse</td>
-			<td>New account universe</td>
-			<td>Sets the account universe. (e.g. <code>SteamID::UniversePublic</code>)</td>
-		</tr>
-	</tbody>
-</table>
+| Name | Parameters | Description |
+|------|------------|-------------|
+| `IsValid` | - | Gets a value indicating whether this instance is valid. |
+| `RenderSteam2` | - | Renders this instance into it's Steam2 "STEAM_" representation. |
+| `RenderSteam3` | - | Renders this instance into it's Steam3 representation. |
+| `RenderSteamInvite` | - | Encodes accountid as HEX which can be used in `http://s.team/p/` URL. |
+| `RenderCsgoFriendCode` | - | Encodes accountid as CS:GO friend code. |
+| `ConvertToUInt64` | - | Converts this SteamID into it's 64bit integer form. |
+| `SetFromURL` | string, callback | Parse any user input including URLs and just steam ids. |
+| `SetFromUInt64` | string or int | Sets the various components of this SteamID from a 64bit integer form. |
+| `SetFromCsgoFriendCode` | string | Sets the accountid of this SteamID from a CS:GO friend code. Resets other components to default values. |
+| `GetAccountID` | - | Gets the account id. |
+| `GetAccountInstance` | - | Gets the account instance. |
+| `GetAccountType` | - | Gets the account type. |
+| `GetAccountUniverse` | - | Gets the account universe. |
+| `SetAccountID` | int | Sets the account id. |
+| `SetAccountInstance` | int | Sets the account instance. (e.g. `SteamID::DesktopInstance`) |
+| `SetAccountType` | int | Sets the account type. (e.g. `SteamID::TypeAnonGameServer`) |
+| `SetAccountUniverse` | int | Sets the account universe. (e.g. `SteamID::UniversePublic`) |
+| `FromAccountID` | int | **Static method.** Constructs an individual SteamID in public universe with desktop instance from an account ID. |
+| `AccountIDToUInt64` | int | **Static method.** Converts an account ID to a 64bit SteamID string. |
+| `AccountIDRender` | int | **Static method.** Renders an account ID as Steam3 representation. |
 
-## New Steam invite URLs
+## Counter-Strike Friend Codes
 
-Valve introduce a new way of sharing profile URLs (https://s.team/p/hjqp or https://steamcommunity.com/user/hjqp). The encoding is simply hex encoded account id and each letter being replaced with a custom alphabet. While HEX originally is `0-9a-f`, in the converted version numbers and letters `a` or `e` are not included, but they still work in the URL because Valve does a single pass replacement.
+CS2 (CS:GO) uses special friend codes for sharing profiles within the game. These codes look like `SUCVS-FADA` and can be generated from or parsed into SteamIDs:
+
+```php
+use xPaw\Steam\SteamID;
+
+$steamId = new SteamID( '[U:1:123456]' );
+$friendCode = $steamId->RenderCsgoFriendCode(); // e.g., "SUCVS-FADA"
+
+// Parse friend code back to SteamID
+$steamId2 = ( new SteamID() )->SetFromCsgoFriendCode( $friendCode );
+echo $steamId2->RenderSteam3(); // [U:1:123456]
+```
+
+## Steam invite URLs
+
+Valve introduced a way of sharing profile URLs (https://s.team/p/hjqp or https://steamcommunity.com/user/hjqp). The encoding is simply hex encoded account id with each letter being replaced using a custom alphabet. While HEX originally is `0-9a-f`, in the converted version numbers and letters `a` or `e` are not included, but they still work in the URL because Valve does a single pass replacement.
 
 This library natively supports parsing `s.team/p/` or `steamcommunity.com/user/` URLs in `SetFromURL` function.
 
-Here's the mapping of replacements:
+Example usage:
 
-Hex | Letter
---|--
-0 | b
-1 | c
-2 | d
-3 | f
-4 | g
-5 | h
-6 | j
-7 | k
-8 | m
-9 | n
-a | p
-b | q
-c | r
-d | t
-e | v
-f | w
+```php
+use xPaw\Steam\SteamID;
+
+$steamId = new SteamID( '[U:1:123456]' );
+$inviteCode = $steamId->RenderSteamInvite(); // e.g., "abc-def"
+
+echo "https://s.team/p/" . $inviteCode;
+echo "https://steamcommunity.com/user/" . $inviteCode;
+```
 
 ## License
 
