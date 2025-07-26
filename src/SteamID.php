@@ -376,7 +376,7 @@ class SteamID implements \Stringable
 			$a = gmp_or( self::ShiftLeft( $Result, 4 ), $IdNibble );
 
 			// Valve certainly knows how to turn accountid into
-			// a complicated algorhitm for no good reason
+			// a complicated algorithm for no good reason
 			$Result = gmp_or( self::ShiftLeft( self::ShiftRight( $Result, 28 ), 32 ), $a );
 			$Result = gmp_or(
 				self::ShiftLeft( self::ShiftRight( $Result, 31 ), 32 ),
