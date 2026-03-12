@@ -939,6 +939,331 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->assertTrue($s->IsValid());
 	}
 
+	#[PHPUnit\Framework\Attributes\DataProvider('unicodeAndNullByteProvider')]
+	public function testConstructorRejectsUnicodeAndNullBytes( string $input ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		new SteamID( $input );
+	}
+
+	#[PHPUnit\Framework\Attributes\DataProvider('unicodeAndNullByteUrlProvider')]
+	public function testSetFromURLRejectsUnicodeAndNullBytes( string $url ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		SteamID::SetFromURL( $url, [ $this, 'fakeResolveVanityURL' ] );
+	}
+
+	public function testSetFromUInt64RejectsUnicode() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+
+		$s = new SteamID();
+		$s->SetFromUInt64( "7656119796026585\xD9\xA1" ); // Arabic-Indic digit
+	}
+
+	public function testInviteUrlWithUnicodeDoesNotCrash() : void
+	{
+		// Unicode gets percent-encoded by URL parser, some encoded chars (like 'c' from %C3)
+		// survive as valid dictionary characters, producing a different but valid SteamID
+		$s = SteamID::SetFromURL( "https://s.team/p/qpn\xC3\xA9pmn", [ $this, 'fakeResolveVanityURL' ] );
+		$this->assertEquals( SteamID::TypeIndividual, $s->GetAccountType() );
+		$this->assertEquals( SteamID::UniversePublic, $s->GetAccountUniverse() );
+	}
+
+	public function testConstructorWithIntParameter() : void
+	{
+		// Large int that fits in PHP int
+		$s = new SteamID( 76561197960265851 );
+
+		$this->assertEquals( 123, $s->GetAccountID() );
+		$this->assertEquals( SteamID::DesktopInstance, $s->GetAccountInstance() );
+		$this->assertEquals( SteamID::UniversePublic, $s->GetAccountUniverse() );
+		$this->assertEquals( SteamID::TypeIndividual, $s->GetAccountType() );
+		$this->assertTrue( $s->IsValid() );
+	}
+
+	public function testSetFromURLNumericVanityThatIsValidSteamID() : void
+	{
+		// When /id/76561197960265733 is used, the code sees it's numeric, creates SteamID,
+		// and if it's valid, returns it directly without calling the vanity callback
+		$callbackCalled = false;
+		$s = SteamID::SetFromURL( 'https://steamcommunity.com/id/76561197960265733', function() use (&$callbackCalled) {
+			$callbackCalled = true;
+			return null;
+		} );
+
+		$this->assertFalse( $callbackCalled );
+		$this->assertEquals( '76561197960265733', $s->ConvertToUInt64() );
+	}
+
+	public function testSetFromURLNumericVanityThatIsInvalidSteamID() : void
+	{
+		// A numeric vanity that doesn't form a valid SteamID should fall through to callback
+		$s = SteamID::SetFromURL( 'https://steamcommunity.com/id/1234', function( string $id, int $type ) {
+			$this->assertEquals( '1234', $id );
+			$this->assertEquals( SteamID::VanityIndividual, $type );
+			return '76561197960265733';
+		} );
+
+		$this->assertEquals( '76561197960265733', $s->ConvertToUInt64() );
+	}
+
+	public function testSetFromURLGroupsVanityType() : void
+	{
+		$s = SteamID::SetFromURL( 'https://steamcommunity.com/groups/valve/', function( string $id, int $type ) {
+			$this->assertEquals( 'valve', $id );
+			$this->assertEquals( SteamID::VanityGroup, $type );
+			return '103582791429521412';
+		} );
+
+		$this->assertEquals( '103582791429521412', $s->ConvertToUInt64() );
+	}
+
+	public function testSetFromURLGamesVanityType() : void
+	{
+		$s = SteamID::SetFromURL( 'https://steamcommunity.com/games/dota2', function( string $id, int $type ) {
+			$this->assertEquals( 'dota2', $id );
+			$this->assertEquals( SteamID::VanityGameGroup, $type );
+			return '103582791433224455';
+		} );
+
+		$this->assertEquals( '103582791433224455', $s->ConvertToUInt64() );
+	}
+
+	public function testSteam3ClanChatIgnoresExplicitInstance() : void
+	{
+		$s = new SteamID( '[c:1:123:999]' );
+		$this->assertEquals( SteamID::InstanceFlagClan, $s->GetAccountInstance() );
+		$this->assertEquals( SteamID::TypeChat, $s->GetAccountType() );
+	}
+
+	public function testSteam3LobbyChatIgnoresExplicitInstance() : void
+	{
+		$s = new SteamID( '[L:1:123:999]' );
+		$this->assertEquals( SteamID::InstanceFlagLobby, $s->GetAccountInstance() );
+		$this->assertEquals( SteamID::TypeChat, $s->GetAccountType() );
+	}
+
+	public function testIsValidForAllAccountTypes() : void
+	{
+		// TypeMultiseat - valid with non-zero ID, any instance, valid universe
+		$s = new SteamID( '[M:1:123:456]' );
+		$this->assertTrue( $s->IsValid() );
+
+		// TypePending
+		$s = ( new SteamID )
+			->SetAccountType( SteamID::TypePending )
+			->SetAccountUniverse( SteamID::UniversePublic )
+			->SetAccountID( 123 );
+		$this->assertTrue( $s->IsValid() );
+
+		// TypeContentServer
+		$s = ( new SteamID )
+			->SetAccountType( SteamID::TypeContentServer )
+			->SetAccountUniverse( SteamID::UniversePublic )
+			->SetAccountID( 123 );
+		$this->assertTrue( $s->IsValid() );
+
+		// TypeAnonGameServer
+		$s = new SteamID( '[A:1:123:456]' );
+		$this->assertTrue( $s->IsValid() );
+
+		// TypeAnonUser
+		$s = ( new SteamID )
+			->SetAccountType( SteamID::TypeAnonUser )
+			->SetAccountUniverse( SteamID::UniversePublic )
+			->SetAccountID( 123 );
+		$this->assertTrue( $s->IsValid() );
+
+		// TypeAnonGameServer with zero ID - still valid (no zero-ID check for this type)
+		$s = new SteamID( '[A:1:0:456]' );
+		$this->assertTrue( $s->IsValid() );
+	}
+
+	public function testIsValidUniverseBoundaries() : void
+	{
+		// Universe 0 (Invalid) should fail
+		$s = ( new SteamID )
+			->SetAccountType( SteamID::TypeIndividual )
+			->SetAccountUniverse( SteamID::UniverseInvalid )
+			->SetAccountInstance( SteamID::DesktopInstance )
+			->SetAccountID( 123 );
+		$this->assertFalse( $s->IsValid() );
+
+		// Universe 5 should fail
+		$s = ( new SteamID )
+			->SetAccountType( SteamID::TypeIndividual )
+			->SetAccountUniverse( 5 )
+			->SetAccountInstance( SteamID::DesktopInstance )
+			->SetAccountID( 123 );
+		$this->assertFalse( $s->IsValid() );
+
+		// All valid universes (1-4)
+		for( $u = 1; $u <= 4; $u++ )
+		{
+			$s = ( new SteamID )
+				->SetAccountType( SteamID::TypeIndividual )
+				->SetAccountUniverse( $u )
+				->SetAccountInstance( SteamID::DesktopInstance )
+				->SetAccountID( 123 );
+			$this->assertTrue( $s->IsValid(), "Universe $u should be valid" );
+		}
+	}
+
+	public function testRenderSteam2ForTypeInvalid() : void
+	{
+		$s = new SteamID( '[I:1:123]' );
+		$this->assertEquals( 'STEAM_1:1:61', $s->RenderSteam2() );
+	}
+
+	public function testCsgo21CharCodeDashInWrongPosition() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		// 21 chars but dash not at position 10
+		( new SteamID() )->SetFromCsgoFriendCode( 'AQGPL3EUJ-SYLSBJ5SL-' );
+	}
+
+	public function testCsgoCodeWrongLength() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		( new SteamID() )->SetFromCsgoFriendCode( 'AAAAA' );
+	}
+
+	public function testCsgoCodeLength15() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		( new SteamID() )->SetFromCsgoFriendCode( 'AAAAA-AAAA-AAAA' );
+	}
+
+	public function testCsgoCodeExtraDashesInSubCode() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Given input is not a valid CS:GO code.' );
+
+		// 10-char code with extra dash: dash at position 5 passes first check,
+		// but after prepending AAAA- and stripping all dashes, length != 13
+		( new SteamID() )->SetFromCsgoFriendCode( 'AAA-A-AAAA' );
+	}
+
+	public function testFromAccountIDZero() : void
+	{
+		$s = SteamID::FromAccountID( 0 );
+		$this->assertEquals( 0, $s->GetAccountID() );
+		$this->assertEquals( SteamID::TypeIndividual, $s->GetAccountType() );
+		$this->assertEquals( SteamID::UniversePublic, $s->GetAccountUniverse() );
+		$this->assertEquals( SteamID::DesktopInstance, $s->GetAccountInstance() );
+		// Valid construction but IsValid returns false for Individual with ID 0
+		$this->assertFalse( $s->IsValid() );
+	}
+
+	public function testRenderSteamInviteForTypeInvalid() : void
+	{
+		// TypeInvalid falls through to same case as TypeIndividual
+		$s = new SteamID();
+		$this->assertEquals( 'b', $s->RenderSteamInvite() );
+	}
+
+	public function testSteam3TypeGSetsInstanceToZero() : void
+	{
+		// Clan type 'g' always sets instance to AllInstances (0)
+		$s = new SteamID( '[g:1:456]' );
+		$this->assertEquals( SteamID::AllInstances, $s->GetAccountInstance() );
+		$this->assertEquals( SteamID::TypeClan, $s->GetAccountType() );
+		$this->assertEquals( 456, $s->GetAccountID() );
+	}
+
+	public function testSteam3TypeTSetsInstanceToZero() : void
+	{
+		// Chat type 'T' always sets instance to AllInstances (0)
+		$s = new SteamID( '[T:1:456]' );
+		$this->assertEquals( SteamID::AllInstances, $s->GetAccountInstance() );
+		$this->assertEquals( SteamID::TypeChat, $s->GetAccountType() );
+	}
+
+	public function testSteam3DefaultInstanceForNonSpecialTypes() : void
+	{
+		// Types without explicit instance (not U, T, g, c, L) get AllInstances as default
+		$s = new SteamID( '[G:1:123]' );
+		$this->assertEquals( SteamID::AllInstances, $s->GetAccountInstance() );
+
+		$s = new SteamID( '[C:1:123]' );
+		$this->assertEquals( SteamID::AllInstances, $s->GetAccountInstance() );
+
+		$s = new SteamID( '[P:1:123]' );
+		$this->assertEquals( SteamID::AllInstances, $s->GetAccountInstance() );
+
+		// Type U defaults to DesktopInstance
+		$s = new SteamID( '[U:1:123]' );
+		$this->assertEquals( SteamID::DesktopInstance, $s->GetAccountInstance() );
+	}
+
+	public function testRenderSteam2ForNonIndividualTypes() : void
+	{
+		// Clan type renders as uint64
+		$s = new SteamID( '[g:1:456]' );
+		$this->assertEquals( $s->ConvertToUInt64(), $s->RenderSteam2() );
+
+		// GameServer renders as uint64
+		$s = new SteamID( '[G:1:123]' );
+		$this->assertEquals( $s->ConvertToUInt64(), $s->RenderSteam2() );
+
+		// AnonGameServer renders as uint64
+		$s = new SteamID( '[A:1:123:456]' );
+		$this->assertEquals( $s->ConvertToUInt64(), $s->RenderSteam2() );
+	}
+
+	public function testSetFromURLNonVanityNonURLPassThrough() : void
+	{
+		// Steam2 format passes through to constructor (has colons, fails IsVanityString)
+		$s = SteamID::SetFromURL( 'STEAM_0:0:4491990', [ $this, 'fakeResolveVanityURL' ] );
+		$this->assertEquals( 8983980, $s->GetAccountID() );
+
+		// Steam3 format passes through to constructor (has brackets/colons)
+		$s = SteamID::SetFromURL( '[g:1:456]', [ $this, 'fakeResolveVanityURL' ] );
+		$this->assertEquals( SteamID::TypeClan, $s->GetAccountType() );
+	}
+
+	public function testTradeOfferArrayPartnerParam() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Provided trade offer URL has no valid partner parameter.' );
+
+		// partner[]=123 produces an array, not a string - tests the is_string check
+		SteamID::SetFromURL( 'https://steamcommunity.com/tradeoffer/new/?partner[]=123', [ $this, 'fakeResolveVanityURL' ] );
+	}
+
+	public function testCsgoFriendCodeRoundTripMultipleValues() : void
+	{
+		$accountIds = [ 1, 123, 12229257, 501294967, 4294967295 ];
+
+		foreach( $accountIds as $id )
+		{
+			$original = new SteamID( "[U:1:$id]" );
+			$code = $original->RenderCsgoFriendCode();
+			$decoded = ( new SteamID() )->SetFromCsgoFriendCode( $code );
+			$this->assertEquals( $id, $decoded->GetAccountID(), "Round-trip failed for account ID $id" );
+		}
+	}
+
+	public function testSteamInviteRoundTripMultipleValues() : void
+	{
+		$accountIds = [ 1, 15, 16, 255, 256, 819, 12229257 ];
+
+		foreach( $accountIds as $id )
+		{
+			$original = SteamID::FromAccountID( $id );
+			$invite = $original->RenderSteamInvite();
+			$decoded = SteamID::SetFromURL( "https://s.team/p/$invite", [ $this, 'fakeResolveVanityURL' ] );
+			$this->assertEquals( $id, $decoded->GetAccountID(), "Invite round-trip failed for account ID $id" );
+		}
+	}
+
 	public static function fakeResolveVanityURLSpecial(string $URL, int $Type) : ?string
 	{
 		if ($URL === 'ab' || strlen($URL) === 32) {
@@ -974,6 +1299,43 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		return $FakeValues[ $Type ][ $URL ] ?? null;
 	}
 
+	public static function unicodeAndNullByteProvider() : array
+	{
+		return [
+			// Null bytes
+			["STEAM_0:0:449\x00199"],
+			["[U:1:12\x003]"],
+			["765611797\x0060265851"],
+			// Unicode digits (Arabic-Indic)
+			["STEAM_0:0:\xD9\xA0\xD9\xA1\xD9\xA2"],
+			["[U:1:\xD9\xA1\xD9\xA2\xD9\xA3]"],
+			["\xD9\xA1\xD9\xA2\xD9\xA3\xD9\xA4\xD9\xA5"],
+			// Unicode letters
+			["STEAM_0:0:caf\xC3\xA9"],
+			["[U:1:12\xC3\xA93]"],
+			// Fullwidth digits
+			["\xEF\xBC\x91\xEF\xBC\x92\xEF\xBC\x93"],
+		];
+	}
+
+	public static function unicodeAndNullByteUrlProvider() : array
+	{
+		return [
+			// Null bytes in vanity
+			["https://steamcommunity.com/id/xp\x00aw/"],
+			// Unicode in vanity path
+			["https://steamcommunity.com/id/caf\xC3\xA9/"],
+			// Null byte in profile id
+			["https://steamcommunity.com/profiles/7656\x001197960265851"],
+			// Unicode in trade offer partner
+			["https://steamcommunity.com/tradeoffer/new/?partner=\xD9\xA1\xD9\xA2\xD9\xA3"],
+			// Null byte in plain vanity string
+			["xp\x00aw"],
+			// Unicode in groups path
+			["https://steamcommunity.com/groups/caf\xC3\xA9/"],
+		];
+	}
+
 	public static function setterOverflowProvider() : array
 	{
 		return [
@@ -996,7 +1358,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			['11111-1111'],
 			['alqf4-byca'],
 			['ALqf4-BYCA'],
-			['ALQF4-BYCÁ'],
+			["ALQF4-BYC\xC3\x81"],
 		];
 	}
 
