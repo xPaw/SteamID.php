@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace xPaw\Steam;
 
 use \InvalidArgumentException;
+use \Uri\WhatWg\Url;
 
 /**
  * The SteamID library provides an easy way to work with SteamIDs and makes
@@ -63,6 +64,29 @@ class SteamID implements \Stringable
 		'd' => 't',
 		'e' => 'v',
 		'f' => 'w',
+	];
+
+	/**
+	 * @var array<string, string> Inverse of $SteamInviteDictionary for decoding
+	 */
+	private static array $SteamInviteDictionaryFlipped =
+	[
+		'b' => '0',
+		'c' => '1',
+		'd' => '2',
+		'f' => '3',
+		'g' => '4',
+		'h' => '5',
+		'j' => '6',
+		'k' => '7',
+		'm' => '8',
+		'n' => '9',
+		'p' => 'a',
+		'q' => 'b',
+		'r' => 'c',
+		't' => 'd',
+		'v' => 'e',
+		'w' => 'f',
 	];
 
 	/**
@@ -480,87 +504,145 @@ class SteamID implements \Stringable
 	 */
 	public static function SetFromURL( string $Value, callable $VanityCallback ) : self
 	{
-		if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/(?P<type>profiles|gid)\/(?P<id>.+?)(?:\/|$)/', $Value, $Matches ) === 1 )
-		{
-			$Value = $Matches[ 'id' ];
-		}
-		else if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/(?P<type>id|groups|games)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1
-		||       preg_match( '/^(?P<type>)(?P<id>[\w-]+)$/', $Value, $Matches ) === 1 ) // Empty capturing group so that $Matches has same indexes
-		{
-			$Length = strlen( $Matches[ 'id' ] );
+		$Url = Url::parse( $Value );
 
-			if( $Length < 2 || $Length > 32 )
+		if( $Url === null )
+		{
+			// Not a URL - treat as plain vanity string or pass through to SteamID constructor
+			if( self::IsVanityString( $Value ) )
 			{
-				throw new InvalidArgumentException( 'Provided vanity url has bad length.' );
+				return self::ResolveVanityOrNumeric( $Value, '', $VanityCallback );
 			}
 
-			// Steam doesn't allow vanity urls to be valid steamids
-			if( self::IsNumeric( $Matches[ 'id' ] ) )
-			{
-				$SteamID = new self( $Matches[ 'id' ] );
+			return new self( $Value );
+		}
 
-				if( $SteamID->IsValid() )
+		$Scheme = $Url->getScheme();
+
+		if( $Scheme !== 'http' && $Scheme !== 'https' )
+		{
+			return new self( $Value );
+		}
+
+		$Host = $Url->getAsciiHost();
+		$IsSteamDomain = $Host === 'steamcommunity.com' || $Host === 'my.steamchina.com';
+		$Path = $Url->getPath();
+		$Segments = explode( '/', $Path );
+
+		if( $IsSteamDomain && isset( $Segments[ 1 ], $Segments[ 2 ] ) && $Segments[ 2 ] !== '' )
+		{
+			switch( $Segments[ 1 ] )
+			{
+				case 'profiles':
+				case 'gid':
+					return new self( $Segments[ 2 ] );
+
+				case 'id':
+				case 'groups':
+				case 'games':
 				{
-					return $SteamID;
+					$Id = $Segments[ 2 ];
+
+					// Validate vanity ID format
+					if( !self::IsVanityString( $Id ) )
+					{
+						break;
+					}
+
+					return self::ResolveVanityOrNumeric( $Id, $Segments[ 1 ], $VanityCallback );
 				}
-			}
 
-			$VanityType = match( $Matches[ 'type' ] )
-			{
-				'groups' => self::VanityGroup,
-				'games' => self::VanityGameGroup,
-				default => self::VanityIndividual,
-			};
+				case 'tradeoffer':
+					if( $Segments[ 2 ] === 'new' )
+					{
+						return self::ParseTradeOfferQuery( $Url->getQuery() );
+					}
+					break;
 
-			$Value = call_user_func( $VanityCallback, $Matches[ 'id' ], $VanityType );
-
-			if( $Value === null )
-			{
-				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.', 404 );
+				case 'user':
+					return self::ParseSteamInvite( $Segments[ 2 ] );
 			}
 		}
-		else if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/tradeoffer\/new\/?\?/', $Value ) === 1 )
+
+		if( $Host === 's.team' && ( $Segments[ 1 ] ?? '' ) === 'p' && isset( $Segments[ 2 ] ) && $Segments[ 2 ] !== '' )
 		{
-			$Query = parse_url( $Value, PHP_URL_QUERY );
-
-			if( $Query === null || $Query === false )
-			{
-				throw new InvalidArgumentException( 'Provided trade offer URL has no query string.' );
-			}
-
-			parse_str( $Query, $Params );
-
-			if( !isset( $Params[ 'partner' ] ) || !is_string( $Params[ 'partner' ] ) || !self::IsNumeric( $Params[ 'partner' ] ) )
-			{
-				throw new InvalidArgumentException( 'Provided trade offer URL has no valid partner parameter.' );
-			}
-
-			$AccountID = (int)$Params[ 'partner' ];
-
-			if( $AccountID > 0xFFFFFFFF )
-			{
-				throw new InvalidArgumentException( 'Provided trade offer URL has an invalid partner parameter.' );
-			}
-
-			return self::FromAccountID( $AccountID );
-		}
-		else if( preg_match( '/^https?:\/\/(?:(?:my\.steamchina|steamcommunity)\.com\/user|s\.team\/p)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
-		{
-			$Value = strtolower( $Matches[ 'id' ] );
-			$Value = preg_replace( '/[^' . implode( '', self::$SteamInviteDictionary ) . ']/', '', $Value );
-			$Value = strtr( (string)$Value, array_flip( self::$SteamInviteDictionary ) );
-			$Value = (int)hexdec( $Value );
-
-			$NewID = new self();
-			$NewID->SetAccountUniverse( self::UniversePublic );
-			$NewID->SetAccountInstance( self::DesktopInstance );
-			$NewID->SetAccountType( self::TypeIndividual );
-			$NewID->SetAccountID( $Value );
-
-			return $NewID;
+			return self::ParseSteamInvite( $Segments[ 2 ] );
 		}
 
 		return new self( $Value );
+	}
+
+	/**
+	 * @param callable(string, int): ?string $VanityCallback
+	 */
+	private static function ResolveVanityOrNumeric( string $Id, string $Type, callable $VanityCallback ) : self
+	{
+		$Length = strlen( $Id );
+
+		if( $Length < 2 || $Length > 32 )
+		{
+			throw new InvalidArgumentException( 'Provided vanity url has bad length.' );
+		}
+
+		// Steam doesn't allow vanity urls to be valid steamids
+		if( self::IsNumeric( $Id ) )
+		{
+			$SteamID = new self( $Id );
+
+			if( $SteamID->IsValid() )
+			{
+				return $SteamID;
+			}
+		}
+
+		$VanityType = match( $Type )
+		{
+			'groups' => self::VanityGroup,
+			'games' => self::VanityGameGroup,
+			default => self::VanityIndividual,
+		};
+
+		$Value = $VanityCallback( $Id, $VanityType );
+
+		if( $Value === null )
+		{
+			throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.', 404 );
+		}
+
+		return new self( $Value );
+	}
+
+	private static function ParseTradeOfferQuery( ?string $Query ) : self
+	{
+		if( $Query === null )
+		{
+			throw new InvalidArgumentException( 'Provided trade offer URL has no query string.' );
+		}
+
+		parse_str( $Query, $Params );
+
+		if( !isset( $Params[ 'partner' ] ) || !is_string( $Params[ 'partner' ] ) || !self::IsNumeric( $Params[ 'partner' ] ) )
+		{
+			throw new InvalidArgumentException( 'Provided trade offer URL has no valid partner parameter.' );
+		}
+
+		return self::FromAccountID( (int)$Params[ 'partner' ] );
+	}
+
+	private static function ParseSteamInvite( string $Id ) : self
+	{
+		$Value = strtolower( $Id );
+		$Value = preg_replace( '/[^bcdfghjkmnpqrtvw]/', '', $Value ) ?? '';
+		$Value = strtr( $Value, self::$SteamInviteDictionaryFlipped );
+		$Value = (int)hexdec( $Value );
+
+		$NewID = new self();
+		$NewID->SetAccountUniverse( self::UniversePublic );
+		$NewID->SetAccountInstance( self::DesktopInstance );
+		$NewID->SetAccountType( self::TypeIndividual );
+		$NewID->SetAccountID( $Value );
+
+		return $NewID;
 	}
 
 	/**
@@ -839,6 +921,11 @@ class SteamID implements \Stringable
 	private static function ShiftRight( int|string|\GMP $x, int $n ) : \GMP
 	{
 		return gmp_div_q( $x, gmp_pow( 2, $n ) );
+	}
+
+	private static function IsVanityString( string $s ) : bool
+	{
+		return preg_match( '/^[\w-]+$/', $s ) === 1;
 	}
 
 	/**

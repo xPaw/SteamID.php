@@ -710,11 +710,16 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ 'http://steamcommunity_com/id/xpaw/' ],
 			[ 'https://steamcommunity,com/profiles/76561210845167618' ],
 			[ 'https://google.com' ],
-			[ 'https://STEAMCOMMUNITY.COM/id/xpaw' ],
-			[ 'https://steamcommunity.com:443/id/xpaw' ],
 			[ 'https://steamcommunity.com/id/test@domain' ],
-			[ 'https://steamcommunity.com/id/xpaw#section' ],
-			[ 'https://steamcommunity.com/id/xpaw?tab=games&sort=recent&filter=all' ],
+			[ 'ftp://steamcommunity.com/id/xpaw/' ],
+			[ 'https://steamcommunity.com/profiles/' ],
+			[ 'https://steamcommunity.com/id/' ],
+			[ 'https://steamcommunity.com/tradeoffer/sent/?partner=22202' ],
+			[ 'https://s.team/something' ],
+			[ 'https://' ],
+			[ 'https://[invalid' ],
+			[ 'http://?query' ],
+			[ 'http://#frag' ],
 			[ 'a' ],
 			[ str_repeat('a', 33) ],
 		];
@@ -749,6 +754,8 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ 'http://my.steamchina.com/profiles/76561197960265733/games' ],
 			[ 'https://my.steamchina.com/profiles/76561210845167618' ],
 			[ 'http://my.steamchina.com/groups/valve/memberslistxml' ],
+			[ 'https://my.steamchina.com/gid/103582791433666425' ],
+			[ 'https://steamcommunity.com/id/my-vanity/' ],
 			[ '76561210845167618' ],
 			[ '[U:1:123]' ],
 			[ 'alfredr' ],
@@ -947,6 +954,7 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			1 => // individual
 			[
 				'alfredr' => '76561197960265733',
+				'my-vanity' => '76561197960265733',
 				'xpaw' => '76561197972494985'
 			],
 
@@ -1005,6 +1013,12 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		return [
 			['https://steamcommunity.com/id/xpaw/?l=english', '76561197972494985'],
 			['https://steamcommunity.com/id/xpaw/screenshots/', '76561197972494985'],
+			['https://STEAMCOMMUNITY.COM/id/xpaw', '76561197972494985'],
+			['https://steamcommunity.com:443/id/xpaw', '76561197972494985'],
+			['https://steamcommunity.com:8080/id/xpaw', '76561197972494985'],
+			['https://user:pass@steamcommunity.com/id/xpaw', '76561197972494985'],
+			['https://steamcommunity.com/id/xpaw#section', '76561197972494985'],
+			['https://steamcommunity.com/id/xpaw?tab=games&sort=recent&filter=all', '76561197972494985'],
 		];
 	}
 
@@ -1026,6 +1040,8 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ 'https://steamcommunity.com/tradeoffer/new?partner=22202', '[U:1:22202]' ],
 			[ 'https://steamcommunity.com/tradeoffer/new?token=xyz&partner=22202', '[U:1:22202]' ],
 			[ 'https://my.steamchina.com/tradeoffer/new/?partner=22202', '[U:1:22202]' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=1', '[U:1:1]' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=4294967295', '[U:1:4294967295]' ],
 		];
 	}
 
@@ -1033,10 +1049,14 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 	{
 		return [
 			[ 'https://steamcommunity.com/tradeoffer/new/' ],
+			[ 'https://steamcommunity.com/tradeoffer/new' ],
 			[ 'https://steamcommunity.com/tradeoffer/new/?token=abc' ],
 			[ 'https://steamcommunity.com/tradeoffer/new/?partner=0' ],
 			[ 'https://steamcommunity.com/tradeoffer/new/?partner=abc' ],
 			[ 'https://steamcommunity.com/tradeoffer/new/?partner=-1' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=4294967296' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=00123' ],
 		];
 	}
 
