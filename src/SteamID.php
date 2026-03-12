@@ -519,6 +519,31 @@ class SteamID implements \Stringable
 				throw new InvalidArgumentException( 'Provided vanity url does not resolve to any SteamID.', 404 );
 			}
 		}
+		else if( preg_match( '/^https?:\/\/(?:my\.steamchina|steamcommunity)\.com\/tradeoffer\/new\/?\?/', $Value ) === 1 )
+		{
+			$Query = parse_url( $Value, PHP_URL_QUERY );
+
+			if( $Query === null || $Query === false )
+			{
+				throw new InvalidArgumentException( 'Provided trade offer URL has no query string.' );
+			}
+
+			parse_str( $Query, $Params );
+
+			if( !isset( $Params[ 'partner' ] ) || !is_string( $Params[ 'partner' ] ) || !self::IsNumeric( $Params[ 'partner' ] ) )
+			{
+				throw new InvalidArgumentException( 'Provided trade offer URL has no valid partner parameter.' );
+			}
+
+			$AccountID = (int)$Params[ 'partner' ];
+
+			if( $AccountID > 0xFFFFFFFF )
+			{
+				throw new InvalidArgumentException( 'Provided trade offer URL has an invalid partner parameter.' );
+			}
+
+			return self::FromAccountID( $AccountID );
+		}
 		else if( preg_match( '/^https?:\/\/(?:(?:my\.steamchina|steamcommunity)\.com\/user|s\.team\/p)\/(?P<id>[\w-]+)(?:\/|$)/', $Value, $Matches ) === 1 )
 		{
 			$Value = strtolower( $Matches[ 'id' ] );

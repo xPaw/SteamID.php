@@ -263,6 +263,20 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		$this->assertEquals( '[g:1:4145017]', $s->RenderSteam3() );
 	}
 
+	#[PHPUnit\Framework\Attributes\DataProvider('tradeOfferUrlProvider')]
+	public function testSetFromTradeOfferUrl( string $URL, string $expected ) : void
+	{
+		$s = SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
+		$this->assertEquals( $expected, $s->RenderSteam3() );
+	}
+
+	#[PHPUnit\Framework\Attributes\DataProvider('invalidTradeOfferUrlProvider')]
+	public function testInvalidTradeOfferUrl( string $URL ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
+	}
+
 	public function testInvalidSteamInviteType( ) : void
 	{
 		$this->expectException( InvalidArgumentException::class );
@@ -999,6 +1013,30 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		return [
 			['AccountIDToUInt64', 123, '76561197960265851'],
 			['RenderAccountID', 123, '[U:1:123]'],
+		];
+	}
+
+	public static function tradeOfferUrlProvider() : array
+	{
+		return [
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=22202', '[U:1:22202]' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=22202&token=abc123', '[U:1:22202]' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?token=abc123&partner=22202', '[U:1:22202]' ],
+			[ 'http://steamcommunity.com/tradeoffer/new/?partner=4491990&token=xyz', '[U:1:4491990]' ],
+			[ 'https://steamcommunity.com/tradeoffer/new?partner=22202', '[U:1:22202]' ],
+			[ 'https://steamcommunity.com/tradeoffer/new?token=xyz&partner=22202', '[U:1:22202]' ],
+			[ 'https://my.steamchina.com/tradeoffer/new/?partner=22202', '[U:1:22202]' ],
+		];
+	}
+
+	public static function invalidTradeOfferUrlProvider() : array
+	{
+		return [
+			[ 'https://steamcommunity.com/tradeoffer/new/' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?token=abc' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=0' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=abc' ],
+			[ 'https://steamcommunity.com/tradeoffer/new/?partner=-1' ],
 		];
 	}
 
