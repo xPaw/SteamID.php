@@ -180,7 +180,7 @@ class SteamID implements \Stringable
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[(?P<type>[AGMPCgcLTIUai]):(?P<universe>[0-4]):(?P<id>0|[1-9][0-9]{0,9})(?:\:(?P<instance>[0-9]+))?\\]$/', (string)$Value, $Matches ) === 1 )
+		else if( preg_match( '/^\\[(?P<type>[AGMPCgcLTIUai]):(?P<universe>[0-4]):(?P<id>0|[1-9][0-9]{0,9})(?:\:(?P<instance>[0-9]{1,7}))?\\]$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 'id' ];
 
@@ -636,7 +636,7 @@ class SteamID implements \Stringable
 			throw new InvalidArgumentException( 'Provided trade offer URL has no valid partner parameter.' );
 		}
 
-		return self::FromAccountID( (int)$Params[ 'partner' ] );
+		return self::FromAccountID( $Params[ 'partner' ] );
 	}
 
 	private static function ParseSteamInvite( string $Id ) : self
@@ -644,15 +644,8 @@ class SteamID implements \Stringable
 		$Value = strtolower( $Id );
 		$Value = preg_replace( '/[^bcdfghjkmnpqrtvw]/', '', $Value ) ?? '';
 		$Value = strtr( $Value, self::SteamInviteDictionaryFlipped );
-		$Value = (int)hexdec( $Value );
 
-		$NewID = new self();
-		$NewID->SetAccountUniverse( self::UniversePublic );
-		$NewID->SetAccountInstance( self::DesktopInstance );
-		$NewID->SetAccountType( self::TypeIndividual );
-		$NewID->SetAccountID( $Value );
-
-		return $NewID;
+		return self::FromAccountID( gmp_strval( gmp_init( $Value !== '' ? $Value : '0', 16 ) ) );
 	}
 
 	/**
@@ -990,7 +983,7 @@ class SteamID implements \Stringable
 	/**
 	 * Construct an individual SteamID in public universe given an account id.
 	 */
-	public static function FromAccountID( int $AccountID ) : self
+	public static function FromAccountID( int|string $AccountID ) : self
 	{
 		return new self()
 			->SetAccountID( $AccountID )

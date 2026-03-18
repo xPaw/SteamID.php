@@ -1264,6 +1264,77 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 		}
 	}
 
+	#[PHPUnit\Framework\Attributes\DataProvider('steamInviteOverflowProvider')]
+	public function testSteamInviteOverflow( string $URL ) : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Account id can not be higher than 0xFFFFFFFF.' );
+
+		SteamID::SetFromURL( $URL, [ $this, 'fakeResolveVanityURL' ] );
+	}
+
+	public function testSteamInviteMaxValidAccountId() : void
+	{
+		// 'wwwwwwww' → hex 'ffffffff' = 0xFFFFFFFF = max valid account id
+		$s = SteamID::SetFromURL( 'https://s.team/p/wwww-wwww', [ $this, 'fakeResolveVanityURL' ] );
+		$this->assertEquals( 4294967295, $s->GetAccountID() );
+		$this->assertEquals( SteamID::TypeIndividual, $s->GetAccountType() );
+		$this->assertEquals( SteamID::UniversePublic, $s->GetAccountUniverse() );
+	}
+
+	public function testSteam2OverflowAfterShift() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Account id can not be higher than 0xFFFFFFFF.' );
+
+		// id=2147483648 passes <= 4294967295 check, but (2147483648 << 1) = 4294967296 > 0xFFFFFFFF
+		new SteamID( 'STEAM_0:0:2147483648' );
+	}
+
+	public function testSteam2OverflowMaxIdAfterShift() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Account id can not be higher than 0xFFFFFFFF.' );
+
+		// id=4294967295 passes gmp check, but (4294967295 << 1) | 1 = 8589934591 > 0xFFFFFFFF
+		new SteamID( 'STEAM_0:1:4294967295' );
+	}
+
+	public function testSteam3InstanceOverflow() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Account instance can not be higher than 0xFFFFF.' );
+
+		// 1048576 = 0xFFFFF + 1, exceeds max instance
+		new SteamID( '[A:1:123:1048576]' );
+	}
+
+	public function testSteam3InstanceOverflowRegex() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Provided SteamID is invalid.' );
+
+		// 8 digits exceeds regex bound {1,7}, rejected at parse level
+		new SteamID( '[A:1:123:12345678]' );
+	}
+
+	public function testSteam3MaxValidInstance() : void
+	{
+		// 1048575 = 0xFFFFF = max valid instance
+		$s = new SteamID( '[A:1:123:1048575]' );
+		$this->assertEquals( 123, $s->GetAccountID() );
+		$this->assertEquals( 1048575, $s->GetAccountInstance() );
+	}
+
+	public function testTradeOfferPartnerOverflow() : void
+	{
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Account id can not be higher than 0xFFFFFFFF.' );
+
+		// 20-digit value exceeds PHP_INT_MAX, would wrap with (int) cast, caught by SetAccountID
+		SteamID::SetFromURL( 'https://steamcommunity.com/tradeoffer/new/?partner=10000000000000000000', [ $this, 'fakeResolveVanityURL' ] );
+	}
+
 	public static function fakeResolveVanityURLSpecial(string $URL, int $Type) : ?string
 	{
 		if ($URL === 'ab' || strlen($URL) === 32) {
@@ -1359,6 +1430,18 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			['alqf4-byca'],
 			['ALqf4-BYCA'],
 			["ALQF4-BYC\xC3\x81"],
+		];
+	}
+
+	public static function steamInviteOverflowProvider() : array
+	{
+		return [
+			// 'c' + 8×'b' → hex '100000000' = 0x100000000 > max 32-bit account id
+			[ 'https://s.team/p/cbbbbbbbb' ],
+			[ 'https://steamcommunity.com/user/cbbbbbbbb/' ],
+			// 'm' + 15×'b' → hex '8000000000000000' > PHP_INT_MAX
+			[ 'https://s.team/p/mbbbbbbbbbbbbbbbb' ],
+			[ 'https://steamcommunity.com/user/mbbbbbbbbbbbbbbbb/' ],
 		];
 	}
 
