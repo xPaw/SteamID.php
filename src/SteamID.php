@@ -145,7 +145,7 @@ class SteamID implements \Stringable
 	 */
 	public function __construct( int|string|null $Value = null )
 	{
-		$this->Data = gmp_init( 0 );
+		$this->Data = \gmp_init( 0 );
 
 		if( $Value === null )
 		{
@@ -153,12 +153,12 @@ class SteamID implements \Stringable
 		}
 
 		// SetFromString
-		if( preg_match( '/^STEAM_(?P<universe>[0-4]):(?P<authServer>[0-1]):(?P<id>0|[1-9][0-9]{0,9})$/', (string)$Value, $Matches ) === 1 )
+		if( \preg_match( '/^STEAM_(?P<universe>[0-4]):(?P<authServer>[0-1]):(?P<id>0|[1-9][0-9]{0,9})$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 'id' ];
 
 			// Check for max unsigned 32-bit number
-			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
+			if( \gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
@@ -180,12 +180,12 @@ class SteamID implements \Stringable
 			$this->SetAccountID( $AccountID );
 		}
 		// SetFromSteam3String
-		else if( preg_match( '/^\\[(?P<type>[AGMPCgcLTIUai]):(?P<universe>[0-4]):(?P<id>0|[1-9][0-9]{0,9})(?:\:(?P<instance>[0-9]{1,7}))?\\]$/', (string)$Value, $Matches ) === 1 )
+		else if( \preg_match( '/^\\[(?P<type>[AGMPCgcLTIUai]):(?P<universe>[0-4]):(?P<id>0|[1-9][0-9]{0,9})(?:\:(?P<instance>[0-9]{1,7}))?\\]$/', (string)$Value, $Matches ) === 1 )
 		{
 			$AccountID = $Matches[ 'id' ];
 
 			// Check for max unsigned 32-bit number
-			if( gmp_cmp( $AccountID, '4294967295' ) > 0 )
+			if( \gmp_cmp( $AccountID, '4294967295' ) > 0 )
 			{
 				throw new InvalidArgumentException( 'Provided SteamID exceeds max unsigned 32-bit integer.' );
 			}
@@ -229,7 +229,7 @@ class SteamID implements \Stringable
 			else
 			{
 				/** @var int $AccountType */
-				$AccountType = array_search( $Type, self::AccountTypeChars, true );
+				$AccountType = \array_search( $Type, self::AccountTypeChars, true );
 
 				$this->SetAccountType( $AccountType );
 			}
@@ -240,7 +240,7 @@ class SteamID implements \Stringable
 		}
 		else if( self::IsNumeric( $Value ) )
 		{
-			$this->Data = gmp_init( $Value, 10 );
+			$this->Data = \gmp_init( $Value, 10 );
 		}
 		else
 		{
@@ -345,14 +345,14 @@ class SteamID implements \Stringable
 			case self::TypeInvalid:
 			case self::TypeIndividual:
 			{
-				$Code = dechex( $this->GetAccountID() );
-				$Code = strtr( $Code, self::SteamInviteDictionary );
-				$Length = strlen( $Code );
+				$Code = \dechex( $this->GetAccountID() );
+				$Code = \strtr( $Code, self::SteamInviteDictionary );
+				$Length = \strlen( $Code );
 
 				// TODO: We don't know when Valve starts inserting the dash
 				if( $Length > 3 )
 				{
-					$Code = substr_replace( $Code, '-', (int)( $Length / 2 ), 0 );
+					$Code = \substr_replace( $Code, '-', (int)( $Length / 2 ), 0 );
 				}
 
 				return $Code;
@@ -387,37 +387,37 @@ class SteamID implements \Stringable
 		}
 
 		// Shift by string "CSGO" (0x4353474)
-		$Hash = gmp_or( $this->GetAccountID(), '0x4353474F00000000' );
+		$Hash = \gmp_or( $this->GetAccountID(), '0x4353474F00000000' );
 
 		// Convert it to little-endian
-		$Hash = gmp_export( $Hash, 8, GMP_LITTLE_ENDIAN );
+		$Hash = \gmp_export( $Hash, 8, \GMP_LITTLE_ENDIAN );
 
 		// Hash the exported number
-		$Hash = md5( $Hash, true );
+		$Hash = \md5( $Hash, true );
 
 		// Take the first 4 bytes and convert it back to a number
-		$Hash = gmp_import( substr( $Hash, 0, 4 ), 4, GMP_LITTLE_ENDIAN );
+		$Hash = \gmp_import( \substr( $Hash, 0, 4 ), 4, \GMP_LITTLE_ENDIAN );
 
-		$Result = gmp_init( 0 );
+		$Result = \gmp_init( 0 );
 
 		for( $i = 0; $i < 8; $i++ )
 		{
 			$IdNibble = $this->Get( 4 * $i, '0xF' );
-			$HashNibble = gmp_and( self::ShiftRight( $Hash, $i ), 1 );
+			$HashNibble = \gmp_and( self::ShiftRight( $Hash, $i ), 1 );
 
-			$a = gmp_or( self::ShiftLeft( $Result, 4 ), $IdNibble );
+			$a = \gmp_or( self::ShiftLeft( $Result, 4 ), $IdNibble );
 
 			// Valve certainly knows how to turn accountid into
 			// a complicated algorithm for no good reason
-			$Result = gmp_or( self::ShiftLeft( self::ShiftRight( $Result, 28 ), 32 ), $a );
-			$Result = gmp_or(
+			$Result = \gmp_or( self::ShiftLeft( self::ShiftRight( $Result, 28 ), 32 ), $a );
+			$Result = \gmp_or(
 				self::ShiftLeft( self::ShiftRight( $Result, 31 ), 32 ),
-				gmp_or( self::ShiftLeft( $a, 1 ), $HashNibble )
+				\gmp_or( self::ShiftLeft( $a, 1 ), $HashNibble )
 			);
 		}
 
 		// Is there a better way of doing this?
-		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
+		$Result = \gmp_import( \gmp_export( $Result, 8, \GMP_BIG_ENDIAN ), 8, \GMP_LITTLE_ENDIAN );
 		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 		$FriendCode = '';
 
@@ -428,12 +428,12 @@ class SteamID implements \Stringable
 				$FriendCode .= '-';
 			}
 
-			$FriendCode .= $Base32[ gmp_intval( gmp_and( $Result, 31 ) ) ];
+			$FriendCode .= $Base32[ \gmp_intval( \gmp_and( $Result, 31 ) ) ];
 			$Result = self::ShiftRight( $Result, 5 );
 		}
 
 		// Strip the AAAA- prefix
-		return substr( $FriendCode, 5 );
+		return \substr( $FriendCode, 5 );
 	}
 
 	/**
@@ -537,7 +537,7 @@ class SteamID implements \Stringable
 		$Host = $Url->getAsciiHost();
 		$IsSteamDomain = $Host === 'steamcommunity.com' || $Host === 'my.steamchina.com';
 		$Path = $Url->getPath();
-		$Segments = explode( '/', $Path );
+		$Segments = \explode( '/', $Path );
 
 		if( $IsSteamDomain && isset( $Segments[ 1 ], $Segments[ 2 ] ) && $Segments[ 2 ] !== '' )
 		{
@@ -587,7 +587,7 @@ class SteamID implements \Stringable
 	 */
 	private static function ResolveVanityOrNumeric( string $Id, string $Type, callable $VanityCallback ) : self
 	{
-		$Length = strlen( $Id );
+		$Length = \strlen( $Id );
 
 		if( $Length < 2 || $Length > 32 )
 		{
@@ -629,9 +629,9 @@ class SteamID implements \Stringable
 			throw new InvalidArgumentException( 'Provided trade offer URL has no query string.' );
 		}
 
-		parse_str( $Query, $Params );
+		\parse_str( $Query, $Params );
 
-		if( !isset( $Params[ 'partner' ] ) || !is_string( $Params[ 'partner' ] ) || !self::IsNumeric( $Params[ 'partner' ] ) )
+		if( !isset( $Params[ 'partner' ] ) || !\is_string( $Params[ 'partner' ] ) || !self::IsNumeric( $Params[ 'partner' ] ) )
 		{
 			throw new InvalidArgumentException( 'Provided trade offer URL has no valid partner parameter.' );
 		}
@@ -641,11 +641,11 @@ class SteamID implements \Stringable
 
 	private static function ParseSteamInvite( string $Id ) : self
 	{
-		$Value = strtolower( $Id );
-		$Value = preg_replace( '/[^bcdfghjkmnpqrtvw]/', '', $Value ) ?? '';
-		$Value = strtr( $Value, self::SteamInviteDictionaryFlipped );
+		$Value = \strtolower( $Id );
+		$Value = \preg_replace( '/[^bcdfghjkmnpqrtvw]/', '', $Value ) ?? '';
+		$Value = \strtr( $Value, self::SteamInviteDictionaryFlipped );
 
-		return self::FromAccountID( gmp_strval( gmp_init( $Value !== '' ? $Value : '0', 16 ) ) );
+		return self::FromAccountID( \gmp_strval( \gmp_init( $Value !== '' ? $Value : '0', 16 ) ) );
 	}
 
 	/**
@@ -661,7 +661,7 @@ class SteamID implements \Stringable
 	{
 		if( self::IsNumeric( $Value ) )
 		{
-			$this->Data = gmp_init( $Value, 10 );
+			$this->Data = \gmp_init( $Value, 10 );
 		}
 		else
 		{
@@ -681,7 +681,7 @@ class SteamID implements \Stringable
 	 */
 	public function ConvertToUInt64() : string
 	{
-		return gmp_strval( $this->Data );
+		return \gmp_strval( $this->Data );
 	}
 
 	/**
@@ -695,7 +695,7 @@ class SteamID implements \Stringable
 	 */
 	public function SetFromCsgoFriendCode( string $Value ) : self
 	{
-		$Length = strlen( $Value );
+		$Length = \strlen( $Value );
 
 		if( $Length === 10 ) // Friend codes
 		{
@@ -712,17 +712,17 @@ class SteamID implements \Stringable
 				throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
 			}
 
-			$Left = self::DecodeCsgoCode( substr( $Value, 0, 10 ) );
-			$Right = self::DecodeCsgoCode( substr( $Value, 11, 10 ) );
+			$Left = self::DecodeCsgoCode( \substr( $Value, 0, 10 ) );
+			$Right = self::DecodeCsgoCode( \substr( $Value, 11, 10 ) );
 
-			$AccountId = gmp_intval( gmp_add(
-				gmp_and( $Left, '0x0000FFFF' ),
-				self::ShiftLeft( gmp_and( $Right, '0x0000FFFF' ), 16 )
+			$AccountId = \gmp_intval( \gmp_add(
+				\gmp_and( $Left, '0x0000FFFF' ),
+				self::ShiftLeft( \gmp_and( $Right, '0x0000FFFF' ), 16 )
 			) );
 
 			$IsGroup =
-				gmp_cmp( gmp_and( $Left, '0xFFFF0000' ), 0x10000 ) === 0 &&
-				gmp_cmp( gmp_and( $Right, '0xFFFF0000' ), 0x10000 ) === 0;
+				\gmp_cmp( \gmp_and( $Left, '0xFFFF0000' ), 0x10000 ) === 0 &&
+				\gmp_cmp( \gmp_and( $Right, '0xFFFF0000' ), 0x10000 ) === 0;
 
 			$this->SetAccountID( $AccountId );
 			$this->SetAccountType( $IsGroup ? self::TypeClan : self::TypeIndividual );
@@ -745,42 +745,42 @@ class SteamID implements \Stringable
 		}
 
 		$Value = 'AAAA-' . $Value;
-		$Value = str_replace( '-', '', $Value );
+		$Value = \str_replace( '-', '', $Value );
 
-		if( strlen( $Value ) !== 13 )
+		if( \strlen( $Value ) !== 13 )
 		{
 			throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
 		}
 
 		$Base32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-		$Result = gmp_init( 0 );
+		$Result = \gmp_init( 0 );
 
 		for( $i = 0; $i < 13; $i++ )
 		{
-			$Character = strpos( $Base32, $Value[ $i ] );
+			$Character = \strpos( $Base32, $Value[ $i ] );
 
 			if( $Character === false )
 			{
 				throw new InvalidArgumentException( 'Given input is not a valid CS:GO code.' );
 			}
 
-			$Result = gmp_or( $Result, self::ShiftLeft( $Character, 5 * $i ) );
+			$Result = \gmp_or( $Result, self::ShiftLeft( $Character, 5 * $i ) );
 		}
 
 		// Is there a way to avoid this?
-		$Result = gmp_import( gmp_export( $Result, 8, GMP_BIG_ENDIAN ), 8, GMP_LITTLE_ENDIAN );
+		$Result = \gmp_import( \gmp_export( $Result, 8, \GMP_BIG_ENDIAN ), 8, \GMP_LITTLE_ENDIAN );
 		$AccountId = 0;
 
 		for( $i = 0; $i < 8; $i++ )
 		{
 			$Result = self::ShiftRight( $Result, 1 );
-			$IdNibble = gmp_and( $Result, '0xF' );
+			$IdNibble = \gmp_and( $Result, '0xF' );
 			$Result = self::ShiftRight( $Result, 4 );
 
-			$AccountId = gmp_or( self::ShiftLeft( $AccountId, 4 ), $IdNibble );
+			$AccountId = \gmp_or( self::ShiftLeft( $AccountId, 4 ), $IdNibble );
 		}
 
-		return gmp_intval( $AccountId );
+		return \gmp_intval( $AccountId );
 	}
 
 	/**
@@ -792,7 +792,7 @@ class SteamID implements \Stringable
 	 */
 	public function GetAccountID() : int
 	{
-		return gmp_intval( $this->Get( 0, '4294967295' ) ); // 4294967295 = 0xFFFFFFFF
+		return \gmp_intval( $this->Get( 0, '4294967295' ) ); // 4294967295 = 0xFFFFFFFF
 	}
 
 	/**
@@ -804,7 +804,7 @@ class SteamID implements \Stringable
 	 */
 	public function GetAccountInstance() : int
 	{
-		return gmp_intval( $this->Get( 32, '1048575' ) ); // 1048575 = 0xFFFFF
+		return \gmp_intval( $this->Get( 32, '1048575' ) ); // 1048575 = 0xFFFFF
 	}
 
 	/**
@@ -816,7 +816,7 @@ class SteamID implements \Stringable
 	 */
 	public function GetAccountType() : int
 	{
-		return gmp_intval( $this->Get( 52, '15' ) ); // 15 = 0xF
+		return \gmp_intval( $this->Get( 52, '15' ) ); // 15 = 0xF
 	}
 
 	/**
@@ -828,7 +828,7 @@ class SteamID implements \Stringable
 	 */
 	public function GetAccountUniverse() : int
 	{
-		return gmp_intval( $this->Get( 56, '255' ) ); // 255 = 0xFF
+		return \gmp_intval( $this->Get( 56, '255' ) ); // 255 = 0xFF
 	}
 
 	/**
@@ -912,14 +912,14 @@ class SteamID implements \Stringable
 	 */
 	private function Get( int $BitOffset, int|string $ValueMask ) : \GMP
 	{
-		return gmp_and( self::ShiftRight( $this->Data, $BitOffset ), $ValueMask );
+		return \gmp_and( self::ShiftRight( $this->Data, $BitOffset ), $ValueMask );
 	}
 
 	private function Set( int $BitOffset, int|string $ValueMask, int|string $Value ) : void
 	{
-		$this->Data = gmp_or(
-			gmp_and( $this->Data, gmp_com( self::ShiftLeft( $ValueMask, $BitOffset ) ) ),
-			self::ShiftLeft( gmp_and( $Value, $ValueMask ), $BitOffset )
+		$this->Data = \gmp_or(
+			\gmp_and( $this->Data, \gmp_com( self::ShiftLeft( $ValueMask, $BitOffset ) ) ),
+			self::ShiftLeft( \gmp_and( $Value, $ValueMask ), $BitOffset )
 		);
 	}
 
@@ -930,7 +930,7 @@ class SteamID implements \Stringable
 	 */
 	private static function ShiftLeft( int|string|\GMP $x, int $n ) : \GMP
 	{
-		return gmp_mul( $x, gmp_pow( 2, $n ) );
+		return \gmp_mul( $x, \gmp_pow( 2, $n ) );
 	}
 
 	/**
@@ -940,12 +940,12 @@ class SteamID implements \Stringable
 	 */
 	private static function ShiftRight( int|string|\GMP $x, int $n ) : \GMP
 	{
-		return gmp_div_q( $x, gmp_pow( 2, $n ) );
+		return \gmp_div_q( $x, \gmp_pow( 2, $n ) );
 	}
 
 	private static function IsVanityString( string $s ) : bool
 	{
-		return preg_match( '/^[\w-]+$/', $s ) === 1;
+		return \preg_match( '/^[\w-]+$/', $s ) === 1;
 	}
 
 	/**
@@ -955,13 +955,13 @@ class SteamID implements \Stringable
 	 */
 	private static function IsNumeric( int|string $n ) : bool
 	{
-		if( is_int( $n ) )
+		if( \is_int( $n ) )
 		{
 			return $n > 0;
 		}
 
 		// @phpstan-ignore-next-line possiblyImpure.functionCall
-		return preg_match( '/^[1-9][0-9]{0,19}$/', $n ) === 1;
+		return \preg_match( '/^[1-9][0-9]{0,19}$/', $n ) === 1;
 	}
 
 	/**

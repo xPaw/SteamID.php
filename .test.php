@@ -715,6 +715,8 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 			[ 'https://steamcommunity.com/profiles/' ],
 			[ 'https://steamcommunity.com/id/' ],
 			[ 'https://steamcommunity.com/tradeoffer/sent/?partner=22202' ],
+			[ 'https://steamcommunity.com/market/listings' ],
+			[ 'https://my.steamchina.com/app/440/discussions' ],
 			[ 'https://s.team/something' ],
 			[ 'https://' ],
 			[ 'https://[invalid' ],
@@ -893,6 +895,15 @@ class SteamIDFacts extends PHPUnit\Framework\TestCase
 	{
 		$s = SteamID::SetFromURL('https://s.team/p/qpn-pmn-xyz123', [$this, 'fakeResolveVanityURL']);
 		$this->assertEquals('[U:1:12229257]', $s->RenderSteam3());
+	}
+
+	public function testInviteUrlWithOnlyInvalidCharacters() : void
+	{
+		$s = SteamID::SetFromURL('https://s.team/p/xyz123', [$this, 'fakeResolveVanityURL']);
+		$this->assertEquals('[U:1:0]', $s->RenderSteam3());
+
+		$s = SteamID::SetFromURL('https://steamcommunity.com/user/zzz/', [$this, 'fakeResolveVanityURL']);
+		$this->assertEquals('[U:1:0]', $s->RenderSteam3());
 	}
 
 	public function testP2PSuperSeederAccountType() : void

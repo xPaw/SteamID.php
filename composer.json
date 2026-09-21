@@ -46,7 +46,6 @@
 		[
 			"/.gitattributes",
 			"/.phpunit.xml",
-			"/coverage.xml",
 			"/Example.php",
 			"/phpstan.neon",
 			"/VanityURLs.php",
